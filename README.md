@@ -1,60 +1,65 @@
-# Secure Voice-Based Emergency Detection System
+# VoiceGuard-ZKP
 
-Sistem ini menggabungkan IoT, Machine Learning, dan Cybersecurity untuk mendeteksi kondisi darurat dari suara pekerja. ESP8266 mengirim audio setelah autentikasi Schnorr Zero-Knowledge Proof. Backend FastAPI menyimpan audio, menjalankan Whisper untuk speech-to-text, mengklasifikasikan transcript dengan BERT, mengirim Telegram jika emergency, lalu mengirim hasil beserta proof server untuk diverifikasi ESP8266.
+Sistem deteksi kondisi darurat berbasis suara yang menggabungkan ESP8266, autentikasi Schnorr Zero-Knowledge Proof, Whisper untuk speech-to-text, BERT untuk klasifikasi, Telegram untuk notifikasi cepat, dan dashboard web untuk monitoring.
 
-## Dokumentasi Visual
+## Overview
 
-Tambahkan gambar pendukung di folder `docs/images/` lalu tampilkan di README:
+- Device ESP8266 mengirim audio setelah autentikasi berhasil
+- Backend FastAPI memproses audio dan menyimpan hasil analisis
+- Whisper mengubah audio menjadi teks
+- BERT menentukan apakah pesan masuk kategori `Emergency` atau `Normal`
+- Telegram dikirim saat kondisi darurat terdeteksi
+- Dashboard web menampilkan perangkat aktif dan event terbaru
 
-```md
-## Dashboard Monitoring
+## Visual Documentation
+
+### Dashboard
+
 ![Dashboard](docs/images/dashboard.png)
 
-## Flowchart Sistem
+### Flowchart
+
 ![Flowchart](docs/images/flowchart.png)
 
-## Prototipe
-![Prototype](docs/images/prototype.png)
-```
+### Prototype
 
-Saran nama file:
+![Prototype](docs/images/prototype.jpg)
 
-- `docs/images/dashboard.png`
-- `docs/images/flowchart.png`
-- `docs/images/prototype.png`
-
-## Upload ke GitHub
-
-Panduan upload repository yang lebih rapi dan profesional tersedia di:
-
-```text
-GITHUB_UPLOAD_GUIDE.md
-```
-
-## Struktur Folder
+## Project Structure
 
 ```text
 backend/
-  api/              Router FastAPI, schema Pydantic, dan dependency injection
-  auth/             Challenge-response auth, token, dan middleware
+  api/              FastAPI router, schemas, and dependencies
+  auth/             Challenge-response auth, token, and middleware
   zkp/              Schnorr parameters, challenge generator, verifier, validator
-  speech/           Service OpenAI Whisper
-  bert/             Service HuggingFace Transformers + PyTorch
-  telegram/         Service Telegram Bot API
-  database/         SQLAlchemy engine, session, dan Base
-  models/           Model tabel SQLite
-  repositories/     Akses data per entitas
-  services/         Use case dan orchestration layer
-  utils/            Logging, exception handler, helper filesystem
-  uploads/          File audio yang diterima
-  logs/             Log aplikasi
-firmware/esp8266/   Firmware PlatformIO untuk NodeMCU ESP8266
-tests/              Unit test pytest
+  speech/           Whisper speech-to-text service
+  bert/             HuggingFace BERT classification service
+  telegram/         Telegram notification service
+  database/         SQLAlchemy engine, session, and Base
+  models/           SQLite ORM models
+  repositories/     Data access layer
+  services/         Application use cases
+  utils/            Logging, exception handler, filesystem helpers
+  uploads/          Stored audio files
+  logs/             Application logs
+firmware/esp8266/   PlatformIO firmware for NodeMCU ESP8266
+dataset_ml/         Cleaned datasets for training
+tests/              Pytest test suite
 ```
 
-## Instalasi
+## Core Features
 
-Gunakan Python 3.12.
+- Schnorr authentication for ESP8266
+- Audio upload and server-side proof generation
+- Whisper transcription
+- BERT text classification
+- Telegram emergency alert
+- Web monitoring dashboard
+- SQLite-based persistence for devices, audio, transcript, classification, and notification
+
+## Installation
+
+Use Python 3.12.
 
 ```bash
 python -m venv .venv
@@ -63,11 +68,11 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Whisper membutuhkan `ffmpeg`. Pastikan `ffmpeg` tersedia di PATH.
+Whisper requires `ffmpeg` to be available in `PATH`.
 
-## Konfigurasi
+## Configuration
 
-Edit `.env`:
+Edit `.env` with your environment values:
 
 ```text
 DATABASE_URL=sqlite:///./backend/database/app.db
@@ -85,27 +90,21 @@ BERT_EMERGENCY_LABELS=Emergency,EMERGENCY,LABEL_1
 BERT_NORMAL_LABELS=Normal,NORMAL,LABEL_0
 ```
 
-Untuk ESP8266 demo, daftarkan device dengan public key `9` jika `DEVICE_SECRET_KEY=5` di firmware.
+For the ESP8266 demo, register the device using public key `9` if `DEVICE_SECRET_KEY=5` in the firmware.
 
-## Menjalankan Backend
-
-Panduan langkah demi langkah untuk menjalankan backend, ESP8266, dan troubleshooting tersedia di:
-
-```text
-PANDUAN_RUNNING.md
-```
+## Run Backend
 
 ```bash
 uvicorn backend.main:app --reload
 ```
 
-Swagger tersedia di:
+Swagger UI:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Endpoint utama:
+Main endpoints:
 
 ```text
 GET  /api/health
@@ -118,18 +117,20 @@ GET  /api/monitoring/overview
 GET  /api/monitoring/events
 ```
 
-## Menjalankan ESP8266
+## Run ESP8266
 
-Versi Arduino IDE tersedia sebagai:
+Firmware source for Arduino IDE:
 
 ```text
 firmware/esp8266/esp8266_emergency_detector.ino
 ```
 
-1. Buka `firmware/esp8266/include/config.h`.
-2. Isi `WIFI_SSID`, `WIFI_PASSWORD`, dan `SERVER_BASE_URL`.
-3. Pastikan parameter Schnorr sama dengan backend.
-4. Build dan upload dengan PlatformIO:
+Steps:
+
+1. Open `firmware/esp8266/include/config.h`
+2. Fill `WIFI_SSID`, `WIFI_PASSWORD`, and `SERVER_BASE_URL`
+3. Make sure Schnorr parameters match the backend
+4. Build and upload with PlatformIO
 
 ```bash
 cd firmware/esp8266
@@ -137,58 +138,48 @@ pio run --target upload
 pio device monitor
 ```
 
-## Penggunaan Whisper
+## Dataset
 
-Backend memakai package `openai-whisper`. Model diatur lewat:
+Prepared training datasets are stored in `dataset_ml/`.
 
-```text
-WHISPER_MODEL_NAME=base
-WHISPER_DEVICE=cpu
-WHISPER_LANGUAGE=
-```
-
-Gunakan model kecil seperti `tiny` atau `base` untuk laptop biasa. Gunakan `small`, `medium`, atau `large` jika mesin cukup kuat.
-
-## Training Model BERT
-
-Siapkan dataset dua kolom:
+Recommended format for training:
 
 ```text
 text,label
-"help fire in area",Emergency
-"everything is normal",Normal
+help fire in area,Emergency
+everything is normal,Normal
 ```
 
-Fine-tune model dengan HuggingFace `AutoModelForSequenceClassification` untuk dua label. Setelah training, simpan model ke folder lokal, misalnya:
+## Testing
 
-```text
-models/bert-emergency
-```
-
-Lalu ubah `.env`:
-
-```text
-BERT_MODEL_NAME=models/bert-emergency
-BERT_EMERGENCY_LABELS=Emergency,EMERGENCY,LABEL_1
-BERT_NORMAL_LABELS=Normal,NORMAL,LABEL_0
-```
-
-## Pengujian Sistem
-
-Jalankan unit test:
+Run the test suite with:
 
 ```bash
 pytest
 ```
 
-Test mencakup:
+Tests cover:
 
 - Schnorr proof verification
-- Auth token
+- Auth token flow
 - Health endpoint
-- OpenAPI/Swagger route availability
-- Pipeline ML dengan fake Whisper, fake BERT, dan fake Telegram
+- OpenAPI route availability
+- ML pipeline using fake Whisper, fake BERT, and fake Telegram
 
-## Catatan Produksi
+## Production Notes
 
-Parameter Schnorr saat ini hanya untuk prototype. Untuk produksi, gunakan parameter kriptografi besar yang direview, secret yang aman, HTTPS, rotasi token, model BERT fine-tuned, dan validasi audio yang lebih ketat.
+The current Schnorr parameters are for prototype use only. For production, use reviewed large cryptographic parameters, secure secrets, HTTPS, token rotation, a fine-tuned BERT model, and stronger audio validation.
+
+## Repository Upload Notes
+
+If you want a clean GitHub upload flow, see:
+
+```text
+docs/guides/upload-github.md
+```
+
+And if you need runtime instructions:
+
+```text
+docs/guides/running-project.md
+```
