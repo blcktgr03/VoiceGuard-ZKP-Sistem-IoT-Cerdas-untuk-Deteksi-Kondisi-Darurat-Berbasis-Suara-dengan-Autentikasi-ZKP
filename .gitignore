@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Environment and secrets
+.env
+.env.*
+
+# Logs and runtime data
+backend/logs/
+backend/uploads/
+*.log
+
+# SQLite / local database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# PlatformIO
+firmware/esp8266/.pio/
+firmware/esp8266/.piolibdeps/
+
+# OS files
+Thumbs.db
+Desktop.ini
