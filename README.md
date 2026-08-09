@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # VoiceGuard ZKP
 
 Proyek ini mendeteksi ucapan darurat pekerja menggunakan perangkat ESP32-S3 dan mikrofon INMP441. Audio dikirim ke FastAPI setelah perangkat lolos autentikasi Schnorr Zero-Knowledge Proof (ZKP), diubah menjadi teks bahasa Indonesia oleh faster-whisper, dikoreksi, lalu diklasifikasikan sebagai `Normal` atau `Emergency` oleh IndoBERT. Hasil akhirnya ditampilkan pada dashboard monitoring dan dikirim kembali ke perangkat untuk mengendalikan buzzer.
@@ -263,3 +264,7 @@ Hentikan hanya proses backend lama yang memang tidak dipakai, atau jalankan serv
 ## Catatan Komentar Kode
 
 Komentar mengikuti sintaks bahasa masing-masing: Python memakai `#` dan docstring, Arduino/JavaScript memakai `//`, HTML memakai `<!-- -->`, serta CSS memakai `/* */`. Komentar ditempatkan per blok logika agar kode tetap valid dan lebih mudah dijelaskan; komentar pada setiap baris sederhana sengaja dihindari karena dapat menutupi alur program.
+=======
+# VoiceGuard-ZKP-Sistem-IoT-Cerdas-untuk-Deteksi-Kondisi-Darurat-Berbasis-Suara-dengan-Autentikasi-ZKP
+VoiceGuard ZKP adalah sistem deteksi kondisi darurat pekerja berbasis suara. Audio diproses menggunakan Whisper untuk menghasilkan teks, lalu diklasifikasikan oleh IndoBERT menjadi Emergency atau Normal. Sistem menggunakan Schnorr Zero-Knowledge Proof untuk autentikasi perangkat dan mengirim notifikasi saat kondisi darurat terdeteksi.
+>>>>>>> 0bddb76 (Initial commit)
