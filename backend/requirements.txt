@@ -4,7 +4,9 @@ sqlalchemy==2.0.36
 pydantic==2.10.4
 pydantic-settings==2.7.1
 python-multipart==0.0.20
-openai-whisper
-transformers
-torch
-httpx
+openai-whisper==20250625
+faster-whisper==1.2.1
+transformers==5.13.1
+torch==2.11.0
+numpy==1.26.4
+httpx==0.28.1

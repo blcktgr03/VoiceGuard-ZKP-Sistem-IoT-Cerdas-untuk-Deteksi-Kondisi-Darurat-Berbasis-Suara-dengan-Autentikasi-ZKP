@@ -1,0 +1,50 @@
+1
+00:00:00,000 --> 00:00:06,000
+Di area kerja, VoiceGuard-ZKP memantau suara secara terus-menerus.
+
+2
+00:00:06,000 --> 00:00:11,000
+Sebuah kardus tiba-tiba jatuh dan menimpa kaki pekerja.
+
+3
+00:00:11,000 --> 00:00:17,000
+Tolong! Kaki saya tertimpa kardus!
+Saya membutuhkan bantuan!
+
+4
+00:00:17,000 --> 00:00:23,000
+Perangkat menangkap suara dan membuktikan identitasnya
+tanpa mengirimkan secret key.
+
+5
+00:00:23,000 --> 00:00:28,000
+Setelah terverifikasi, audio dikirim ke backend untuk diproses.
+
+6
+00:00:28,000 --> 00:00:36,000
+Whisper mengubah suara menjadi teks.
+IndoBERT mendeteksi keadaan darurat dengan confidence 94 persen.
+
+7
+00:00:36,000 --> 00:00:43,000
+Dashboard berubah menjadi bahaya
+dan menunjukkan lokasi sumber suara.
+
+8
+00:00:43,000 --> 00:00:49,000
+Peringatan otomatis dikirim kepada petugas keselamatan.
+
+9
+00:00:49,000 --> 00:00:56,000
+Berdasarkan lokasi perangkat, petugas segera tiba
+dan memberikan pertolongan.
+
+10
+00:00:56,000 --> 00:01:02,000
+Kondisi berhasil ditangani
+dan sistem kembali dalam status aman.
+
+11
+00:01:02,000 --> 00:01:08,000
+VoiceGuard-ZKP: mendengar, memahami, mendeteksi,
+dan membantu mempercepat respons darurat.

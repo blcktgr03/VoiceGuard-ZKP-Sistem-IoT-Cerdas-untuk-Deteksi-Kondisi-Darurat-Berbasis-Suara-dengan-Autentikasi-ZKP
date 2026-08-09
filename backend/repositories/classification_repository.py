@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 
 from backend.api.schemas import ClassificationLabel
+from backend.models.audio_record import AudioRecord
 from backend.models.classification import Classification
+from backend.models.transcript import Transcript
 
 
 class ClassificationRepository:
@@ -29,3 +31,19 @@ class ClassificationRepository:
         self._db.commit()
         self._db.refresh(classification)
         return classification
+
+    def get_previous_for_device(
+        self,
+        device_id: int,
+        current_classification_id: int,
+    ) -> Classification | None:
+        """Return the previous classification for the same device."""
+        return (
+            self._db.query(Classification)
+            .join(Transcript, Classification.transcript_id == Transcript.id)
+            .join(AudioRecord, Transcript.audio_record_id == AudioRecord.id)
+            .filter(AudioRecord.device_id == device_id)
+            .filter(Classification.id != current_classification_id)
+            .order_by(Classification.created_at.desc(), Classification.id.desc())
+            .first()
+        )

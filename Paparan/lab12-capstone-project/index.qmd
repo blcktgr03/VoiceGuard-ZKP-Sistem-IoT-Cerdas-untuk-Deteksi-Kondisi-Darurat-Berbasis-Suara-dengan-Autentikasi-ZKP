@@ -1,0 +1,1970 @@
+---
+title: "Lab 12: Capstone Project Intensive"
+subtitle: "Integrasi Komprehensif: Dari Ideasi hingga Deployment Sistem ML Produksi"
+author: "Pembelajaran Mesin - Data Science for Cybersecurity"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    toc-location: left
+    number-sections: true
+    number-depth: 4
+    code-fold: false
+    code-tools: true
+    code-line-numbers: true
+    code-copy: true
+    theme: cosmo
+    highlight-style: github
+    fig-width: 10
+    fig-height: 6
+    fig-dpi: 300
+    css: ../styles/lab-style.css
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=20mm
+      - left=20mm
+      - right=20mm
+      - bottom=20mm
+    code-block-bg: "#f5f5f5"
+    code-block-border-left: "#3498db"
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+---
+
+# Lab 12: Capstone Project Intensive
+
+## Selamat Datang ke Kulminasi Pembelajaran Mesin!
+
+::: {.callout-note}
+**Apa yang akan Anda lakukan:** Membangun dan mendeploykan sistem machine learning produksi yang mengintegrasikan SEMUA konsep dari seluruh kursus.
+
+**Tingkat Kesulitan:** Advanced
+
+**Estimasi Waktu:** 8 jam (proyek multi-minggu, Minggu 13-14)
+
+**Tujuan Utama:** Demonstrasi mastery dalam problem-solving ML end-to-end dengan standar profesional
+:::
+
+## Mengapa Lab Ini Penting?
+
+Lab capstone adalah **puncak** dari perjalanan pembelajaran Anda. Ini bukan sekadar tugas - ini adalah kesempatan untuk:
+
+1. **Menunjukkan Kompetensi Penuh**: Mengintegrasikan semua 5 CPMK (learning outcomes) dalam satu proyek kohesif
+2. **Menghadapi Tantangan Real-World**: Bekerja dengan dataset asli, constraint bisnis, dan ketidakpastian
+3. **Membangun Portfolio**: Proyek berkualitas tinggi untuk karir data science Anda
+4. **Menguasai Praktik Profesional**: Mengikuti standar industri untuk ML development
+
+### Skenario Real-World
+
+**Anda adalah Senior ML Engineer untuk startup FinTech:**
+
+Startup kami menghadapi masalah serius dengan fraud detection. Sistem lama kami berbasis rule manual dan hanya menangkap 45% fraud dengan false positive rate 15% (banyak customer komplain). Kami butuh solusi ML yang robust untuk:
+
+- Meningkatkan fraud detection rate menjadi 85%+
+- Mengurangi false positive rate menjadi <5%
+- API harus merespons dalam <100ms (per request)
+- Model harus interpretable (bisa jelaskan ke compliance team)
+- System harus production-ready dengan monitoring
+
+Deadline: 2 minggu, budget: Anda (tim kecil). GO!
+
+---
+
+## Tujuan Pembelajaran (Learning Outcomes)
+
+Setelah menyelesaikan capstone ini, Anda mampu:
+
+### CPMK-1: Foundational ML Knowledge
+1. **Mengaplikasikan** fundamental ML concepts untuk memecahkan masalah dunia nyata
+2. **Menjelaskan** pilihan model dengan justifikasi teknis dan bisnis yang kuat
+
+### CPMK-2: End-to-End ML Pipelines
+3. **Membangun** complete ML pipeline dari data collection hingga deployment
+4. **Mengoptimalkan** pipeline untuk latency, memory, dan throughput constraints
+5. **Mengidentifikasi** dan memitigasi data leakage dan common pitfalls
+
+### CPMK-3: Critical Analysis & Evaluation
+6. **Mengevaluasi** model dengan multiple metrics yang appropriate untuk use case
+7. **Menganalisis** failure modes dan melakukan error analysis sistematis
+8. **Memvalidasi** hasil dengan cross-validation dan proper train/val/test splitting
+
+### CPMK-4: Advanced Solutions
+9. **Mengimplementasikan** advanced techniques (ensemble, hyperparameter tuning, transfer learning)
+10. **Merancang** system architecture untuk scalability dan maintainability
+
+### CPMK-5: Production ML Systems
+11. **Mendeploy** model ke production dengan proper containerization dan monitoring
+12. **Dokumentasikan** sistem dengan standar profesional (model cards, READMEs, technical reports)
+13. **Mempresentasikan** findings dan insights kepada stakeholders dengan berbagai backgrounds
+
+---
+
+## Struktur Lab: 5 Bagian Terintegrasi (8 Jam Total)
+
+```{mermaid}
+%%| fig-cap: Lab 12 Capstone Project Workflow
+%%| fig-width: 100%
+
+graph TD
+    Start["🎯 LAB 12: CAPSTONE PROJECT"]
+
+    Part1["📋 BAGIAN 1: Project Planning & Scoping<br/>(2 jam)"]
+    Part1a["✓ Memilih domain dan problem definition"]
+    Part1b["✓ SMART criteria dan success metrics"]
+    Part1c["✓ Timeline dan risk assessment"]
+    Part1d["📦 Deliverable: Project Proposal"]
+
+    Part2["📊 BAGIAN 2: Data & EDA<br/>(2 jam)"]
+    Part2a["✓ Data collection dan loading"]
+    Part2b["✓ Comprehensive EDA"]
+    Part2c["✓ Data preprocessing pipeline"]
+    Part2d["📦 Deliverable: EDA Report + Processed Dataset"]
+
+    Part3["🤖 BAGIAN 3: Model Development<br/>(2 jam)"]
+    Part3a["✓ Baseline model & advanced models"]
+    Part3b["✓ Systematic experimentation"]
+    Part3c["✓ Hyperparameter tuning & validation"]
+    Part3d["📦 Deliverable: Model comparison & selection"]
+
+    Part4["🚀 BAGIAN 4: Deployment & Production<br/>(1.5 jam)"]
+    Part4a["✓ Model serialization & API development"]
+    Part4b["✓ Docker containerization"]
+    Part4c["✓ Monitoring & testing"]
+    Part4d["📦 Deliverable: Deployable container + docs"]
+
+    Part5["📢 BAGIAN 5: Presentation & Reporting<br/>(0.5 jam)"]
+    Part5a["✓ Technical report writing"]
+    Part5b["✓ Presentation preparation"]
+    Part5c["📦 Deliverable: Report + slides"]
+
+    Start --> Part1
+    Part1 --> Part1a --> Part1b --> Part1c --> Part1d
+    Part1d --> Part2
+    Part2 --> Part2a --> Part2b --> Part2c --> Part2d
+    Part2d --> Part3
+    Part3 --> Part3a --> Part3b --> Part3c --> Part3d
+    Part3d --> Part4
+    Part4 --> Part4a --> Part4b --> Part4c --> Part4d
+    Part4d --> Part5
+    Part5 --> Part5a --> Part5b --> Part5c
+
+    style Start fill:#4a148c,color:#fff,stroke:#4a148c,stroke-width:3px
+    style Part1 fill:#1976d2,color:#fff,stroke:#1976d2,stroke-width:2px
+    style Part2 fill:#388e3c,color:#fff,stroke:#388e3c,stroke-width:2px
+    style Part3 fill:#f57c00,color:#fff,stroke:#f57c00,stroke-width:2px
+    style Part4 fill:#d32f2f,color:#fff,stroke:#d32f2f,stroke-width:2px
+    style Part5 fill:#7b1fa2,color:#fff,stroke:#7b1fa2,stroke-width:2px
+
+    style Part1d fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style Part2d fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    style Part3d fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style Part4d fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    style Part5c fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+---
+
+# BAGIAN 1: Project Planning & Scoping (2 Jam)
+
+## 1.1 Memilih Domain Proyek Anda
+
+Anda harus memilih SATU dari 5 domain proyek yang disediakan. Setiap domain memiliki:
+
+- Problem statement template
+- Dataset sources
+- Success metrics guidelines
+- Example deliverables
+
+### Opsi 1: Cybersecurity ML Application
+
+**Use Case: Malware Detection menggunakan Binary Features**
+
+```
+PROBLEM CONTEXT:
+- Setiap hari, lebih dari 350,000 file malware baru dikembangkan
+- Antivirus signatures hanya menangkap 60% malware
+- Anda butuh proactive detection berbasis machine learning
+
+GOAL:
+Membangun classifier untuk membedakan benign vs malware executable
+dengan accuracy 90%+ dan false positive rate <5%
+
+DATA:
+- EMBER Dataset: 600K Windows PE files
+- 2381 static features (header, section info, imports, etc.)
+- Binary labels: benign/malware
+- Size: ~10GB (processed: ~2GB)
+
+SUCCESS METRICS:
+- Classification accuracy: ≥90%
+- False positive rate: <5% (minimize blocking legit software)
+- False negative rate: <15% (catch most malware)
+- Inference time: <100ms per file
+- Model interpretability: Top 10 important features identifiable
+```
+
+**References & Data Sources:**
+
+- EMBER Dataset: [https://github.com/elastic/ember](https://github.com/elastic/ember)
+- DREBIN Android: [https://drebin.re](https://drebin.re)
+- VirusShare: [https://virusshare.com](https://virusshare.com)
+
+---
+
+### Opsi 2: Business Intelligence - Customer Analytics
+
+**Use Case: Customer Churn Prediction**
+
+```
+PROBLEM CONTEXT:
+- Telco company dengan 100K+ customers
+- Annual churn rate: 26% (industry average)
+- Cost untuk acquire new customer: $500-1000
+- Retention cost: $50-100 per customer
+
+GOAL:
+Predict which customers akan churn dalam 3 bulan ke depan,
+sehingga sales team bisa proactively engage dengan targeted offers
+
+DATA:
+- Customer demographics, service usage, billing info
+- ~20 features per customer
+- 7000+ historical customers dengan churn labels
+- Class imbalance: 73% retained, 27% churned
+
+SUCCESS METRICS:
+- Recall (catch churners): ≥80%
+- Precision (avoid false alarms): ≥60%
+- ROC-AUC: ≥0.85
+- Business impact: Identify top 20% customers untuk retention program
+```
+
+**References & Data Sources:**
+
+- Kaggle Telco Churn: [https://www.kaggle.com/datasets/blastchar/telco-customer-churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
+- UCI Telecom Churn: [https://archive.ics.uci.edu](https://archive.ics.uci.edu)
+
+---
+
+### Opsi 3: Healthcare Analytics - Disease Prediction
+
+**Use Case: Diabetes Risk Prediction**
+
+```
+PROBLEM CONTEXT:
+- Diabetes adalah silent killer - banyak undiagnosed cases
+- Early detection bisa mencegah serious complications
+- Healthcare providers butuh tool untuk risk stratification
+
+GOAL:
+Membangun predictive model untuk identify high-risk patients
+yang butuh lebih intensif screening/intervention
+
+DATA:
+- Clinical measurements (glucose, BP, BMI, age, etc.)
+- Medical history dan lifestyle factors
+- 768 patients dengan diabetes outcome
+- Features: 8 medical/demographic variables
+
+SUCCESS METRICS:
+- Sensitivity (catch diabetics): ≥85%
+- Specificity (avoid false alarms): ≥70%
+- AUC-ROC: ≥0.82
+- Model interpretability: Doctor-friendly explanations
+```
+
+**References & Data Sources:**
+
+- Kaggle Diabetes: [https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database](https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database)
+- UCI ML Repository: [https://archive.ics.uci.edu/ml](https://archive.ics.uci.edu/ml)
+
+---
+
+### Opsi 4: NLP/LLM Application - Text Classification
+
+**Use Case: Sentiment Analysis untuk Customer Reviews**
+
+```
+PROBLEM CONTEXT:
+- E-commerce platform dengan 100K+ reviews per hari
+- Manual review scoring is expensive (80 jam/hari labor)
+- Butuh automated sentiment classification untuk business insights
+
+GOAL:
+Classify product reviews menjadi Positive/Negative/Neutral
+dengan accuracy 85%+ untuk support monitoring dan QA
+
+DATA:
+- Amazon reviews atau custom e-commerce dataset
+- 5000-50000 reviews dengan sentiment labels
+- Text length: 50-500 words per review
+- Class distribution: mixed (need to handle imbalance)
+
+SUCCESS METRICS:
+- Multi-class accuracy: ≥85%
+- Macro F1-score: ≥0.82
+- Balanced precision/recall across classes
+- Inference time: <50ms per review
+- Interpretability: Which words/phrases drive sentiment?
+```
+
+**References & Data Sources:**
+
+- Amazon Reviews: [https://www.kaggle.com/datasets/snap/amazon-reviews](https://www.kaggle.com/datasets/snap/amazon-reviews)
+- Movie Reviews: [https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews)
+
+---
+
+### Opsi 5: Computer Vision - Image Classification
+
+**Use Case: Malware vs Benign Binary Visualization**
+
+```
+PROBLEM CONTEXT:
+- Malware analysis traditionally requires reverse engineering
+- Visual features dari binary images bisa reveal patterns
+- Researchers successfully use CNN untuk malware classification
+
+GOAL:
+Classify grayscale binary images dari executable files
+ke malware/benign categories dengan high accuracy
+
+DATA:
+- Binary visualization dari PE files (grayscale images)
+- 1000-5000 images (32x32 or 64x64 resolution)
+- Balanced classes (500-2500 per class)
+- Can use transfer learning (ImageNet pretrained models)
+
+SUCCESS METRICS:
+- Image classification accuracy: ≥88%
+- Balanced precision/recall
+- Model interpretability: Visualization of learned features
+- Inference time: <50ms per image
+- Can work with limited data (data augmentation)
+```
+
+**References & Data Sources:**
+
+- EMBER Visualizations: [https://github.com/elastic/ember/blob/master/analysis/visualize.py](https://github.com/elastic/ember/blob/master/analysis/visualize.py)
+- MNIST-style binary images can be created from PE file headers
+
+---
+
+## 1.2 Problem Definition dengan SMART Criteria
+
+Pilih satu domain di atas, kemudian lengkapi **Project Proposal Template**:
+
+::: {.callout-important}
+## TASK 1.1: Problem Definition
+
+Gunakan `PROJECT_PROPOSAL_TEMPLATE.md` untuk mendefinisikan:
+
+1. **Business Context** (2-3 paragraf)
+   - Siapa stakeholder?
+   - Apa problem yang ingin diselesaikan?
+   - Kenapa penting sekarang?
+
+2. **Data** (1 paragraf)
+   - Source data
+   - Size dan characteristics
+   - Key features
+
+3. **Success Metrics** (3-5 metrics)
+   - Primary metric (aligned dengan business goal)
+   - Secondary metrics
+   - Success threshold
+
+4. **Constraints**
+   - Latency requirement
+   - Model interpretability needs
+   - Data privacy/compliance
+   - Resource constraints
+
+5. **Deliverables**
+   - What will you deliver?
+   - When (milestones)?
+   - How will it be used?
+
+**Deadline:** Selesaikan sebelum mulai coding apapun!
+:::
+
+**Template Quick Reference:**
+
+```markdown
+# Project Proposal: [Project Title]
+
+## Executive Summary
+[2-3 sentences: what you're building, why it matters, expected impact]
+
+## Problem Statement
+### Context
+[Industry context and current situation]
+
+### Problem
+[Specific problem to solve]
+
+### Data
+- Source: [where data comes from]
+- Size: [n samples x m features]
+- Target: [what we're predicting]
+- Class distribution: [if applicable]
+
+### Success Criteria (SMART)
+| Metric | Target | Justification |
+|--------|--------|---------------|
+| Primary: Accuracy/Recall | ≥85% | Business need: ... |
+| Secondary: Precision | ≥75% | Important because: ... |
+| Latency | <100ms | Production requirement |
+
+## Approach Overview
+[Bullet points: how you'll solve it]
+
+## Timeline & Milestones
+- Week 1: [What]
+- Week 2: [What]
+- etc.
+
+## Risks & Mitigation
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|-----------|
+| ... | ... | ... | ... |
+```
+
+---
+
+## 1.3 Timeline & Milestone Planning
+
+**Struktur Timeline untuk Capstone (2 Minggu = 8 Jam Lab + Kerja Independen):**
+
+```
+WEEK 13 (4 jam lab + homework):
+├─ Monday: Lab Bagian 1-2 (Planning + EDA)
+│   └─ Output: Project proposal finalized
+│   └─ Output: EDA report drafted
+├─ Wednesday: Lab Bagian 3 (Modeling)
+│   └─ Output: Baseline model trained
+│   └─ Output: Experiment #1-2 completed
+├─ Friday: Homework
+│   └─ Run experiments #3-5
+│   └─ Feature engineering
+│   └─ Hyperparameter tuning
+│
+WEEK 14 (4 jam lab + homework):
+├─ Monday: Lab Bagian 4-5 (Deployment + Reporting)
+│   └─ Output: FastAPI/Flask app working
+│   └─ Output: Docker container built
+│   └─ Output: Technical report drafted
+├─ Wednesday: Lab Q&A + Finalization
+│   └─ Fix any issues
+│   └─ Prepare presentation
+├─ Friday: FINAL PRESENTATION
+│   └─ Each student: 15-20 minute presentation
+│   └─ Live demo atau video walkthrough
+│   └─ Q&A with instructors
+```
+
+::: {.callout-warning}
+## ⚠️ Critical Milestones
+
+**Week 13 - MUST Complete by EOD Wednesday:**
+
+- [ ] Project proposal approved
+- [ ] Dataset acquired and loaded
+- [ ] EDA completed
+- [ ] Baseline model trained
+
+**Week 13 - MUST Complete by EOD Friday:**
+
+- [ ] 3+ models trained and compared
+- [ ] Best model selected
+- [ ] Cross-validation results documented
+
+**Week 14 - MUST Complete by EOD Wednesday:**
+
+- [ ] Model deployed in API/Docker
+- [ ] Technical report 80% done
+- [ ] Presentation slides prepared
+
+**Week 14 - FINAL:**
+
+- [ ] All deliverables submitted
+- [ ] Code cleaned and documented
+- [ ] Presentation delivered
+:::
+
+---
+
+## 1.4 Risk Assessment Template
+
+Sebelum memulai, identifikasi potensi blockers:
+
+::: {.callout-important}
+## TASK 1.2: Risk Assessment
+
+Complete tabel berikut dalam proposal Anda:
+
+| Risk | Probability | Impact | Mitigation Strategy |
+|------|-------------|--------|---------------------|
+| Data tidak tersedia | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+| Dataset terlalu besar | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+| Model tidak konvergen | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+| Class imbalance | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+| Scope creep | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+| Documentation incomplete | [H/M/L] | [Critical/High/Med] | [Your mitigation] |
+
+**Guidance untuk setiap domain:**
+
+**Cybersecurity:**
+
+- Risk: EMBER dataset terlalu besar (10GB)
+- Mitigation: Download sample 100K files, atau gunakan preprocessed features
+
+**Business Intelligence:**
+
+- Risk: Imbalanced churn data (27% vs 73%)
+- Mitigation: Plan SMOTE, stratified sampling, class weights
+
+**Healthcare:**
+
+- Risk: Dataset terlalu kecil untuk deep learning
+- Mitigation: Use traditional ML (RF, XGBoost), extensive validation
+
+**NLP:**
+
+- Risk: Text preprocessing complexity
+- Mitigation: Use pretrained embeddings (Word2Vec, fastText, BERT)
+
+**Computer Vision:**
+
+- Risk: Limited training data
+- Mitigation: Data augmentation, transfer learning, smaller model
+:::
+
+---
+
+# BAGIAN 2: Data & EDA (2 Jam)
+
+## 2.1 Data Collection & Loading
+
+::: {.callout-important}
+## TASK 2.1: Load Your Dataset
+
+Sesuaikan dengan domain pilihan Anda:
+
+### Option 1: Cybersecurity (EMBER)
+```python
+import pandas as pd
+import numpy as np
+
+# Load EMBER sample (preprocessed features)
+# Option A: Download dari GitHub
+# git clone https://github.com/elastic/ember
+# cd ember && python extract_features.py -d path/to/binaries
+
+# Option B: Use preprocessed data
+X_train = pd.read_csv('ember_train_features.csv')
+y_train = pd.read_csv('ember_train_labels.csv')
+X_test = pd.read_csv('ember_test_features.csv')
+y_test = pd.read_csv('ember_test_labels.csv')
+
+print(f"Training data: {X_train.shape}")
+print(f"Features: {X_train.columns.tolist()[:5]}... (total {X_train.shape[1]})")
+print(f"Class distribution: {y_train.value_counts()}")
+```
+
+### Option 2: Business Intelligence (Telco Churn)
+```python
+# Download dari Kaggle
+import pandas as pd
+
+df = pd.read_csv('WA_Fn-UseC_-Telco-Customer-Churn.csv')
+print(f"Data shape: {df.shape}")
+print(f"Columns: {df.columns.tolist()}")
+print(f"\nFirst few rows:")
+print(df.head())
+
+# Separate features and target
+X = df.drop('Churn', axis=1)
+y = df['Churn']
+```
+
+### Option 3: Healthcare (Diabetes)
+```python
+import pandas as pd
+from sklearn.datasets import load_diabetes
+
+# Pima Indian Diabetes Dataset
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+columns = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness',
+           'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
+
+df = pd.read_csv(url, names=columns)
+print(f"Dataset: {df.shape}")
+print(df.info())
+```
+
+### Option 4: NLP (Sentiment Analysis)
+```python
+import pandas as pd
+
+# Amazon reviews atau custom data
+df = pd.read_csv('amazon_reviews.csv')
+# Expected columns: text, rating/sentiment
+
+print(f"Reviews: {len(df)}")
+print(f"Text length range: {df['text'].str.len().min()}-{df['text'].str.len().max()}")
+print(f"Sentiment distribution: {df['sentiment'].value_counts()}")
+```
+
+### Option 5: Computer Vision
+```python
+import numpy as np
+from PIL import Image
+import os
+
+# Load binary visualization images
+image_dir = 'binary_images/'
+images = []
+labels = []
+
+for filename in os.listdir(image_dir):
+    if filename.endswith('.png'):
+        img = Image.open(os.path.join(image_dir, filename)).convert('L')
+        images.append(np.array(img))
+        labels.append(1 if 'malware' in filename else 0)
+
+X = np.array(images)
+y = np.array(labels)
+print(f"Images: {X.shape}")
+print(f"Class distribution: {pd.Series(y).value_counts()}")
+```
+:::
+
+---
+
+## 2.2 Exploratory Data Analysis (EDA)
+
+::: {.callout-important}
+## TASK 2.2: Comprehensive EDA
+
+Lengkapi setiap section berikut sesuai tipe data Anda:
+
+### Section 1: Dataset Overview
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Basic statistics
+print("=" * 60)
+print("DATASET OVERVIEW")
+print("=" * 60)
+print(f"Shape: {df.shape}")
+print(f"Memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
+print(f"\nData types:\n{df.dtypes}")
+print(f"\nMissing values:\n{df.isnull().sum()}")
+print(f"\nDuplicate rows: {df.duplicated().sum()}")
+
+# Basic statistics
+print(f"\nDescriptive statistics:\n{df.describe()}")
+```
+
+### Section 2: Missing Values Analysis
+```python
+# Visualize missing values
+missing_pct = (df.isnull().sum() / len(df) * 100).sort_values(ascending=False)
+print("Missing value percentage:")
+print(missing_pct[missing_pct > 0])
+
+# Heatmap of missing values
+if missing_pct.sum() > 0:
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(df.isnull(), cbar=False, yticklabels=False)
+    plt.title('Missing Values Heatmap')
+    plt.tight_layout()
+    plt.show()
+
+# Decision: imputation strategy
+# Common approaches:
+# - Numerical: mean/median/KNN imputation
+# - Categorical: mode/new category
+# - Option: Drop if >50% missing
+```
+
+### Section 3: Target Variable Distribution
+```python
+# For classification problems
+if problem_type == 'classification':
+    print("\nTarget distribution:")
+    print(y.value_counts())
+    print(f"\nClass balance: {y.value_counts(normalize=True)}")
+
+    # Visualize
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+    y.value_counts().plot(kind='bar', ax=axes[0])
+    axes[0].set_title('Class Distribution (Count)')
+    y.value_counts(normalize=True).plot(kind='bar', ax=axes[1])
+    axes[1].set_title('Class Balance (%)')
+    plt.tight_layout()
+    plt.show()
+
+    # Flag if imbalanced (>60/40 split)
+    if y.value_counts().min() / len(y) < 0.4:
+        print("⚠️ WARNING: Imbalanced dataset detected!")
+        print("   Plan for: SMOTE, class weights, or stratified sampling")
+
+# For regression problems
+else:
+    print("\nTarget variable distribution:")
+    print(y.describe())
+
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 2, 1)
+    plt.hist(y, bins=50, edgecolor='black')
+    plt.title('Target Distribution')
+    plt.xlabel('Value')
+
+    plt.subplot(1, 2, 2)
+    plt.boxplot(y)
+    plt.title('Target Box Plot')
+    plt.show()
+```
+
+### Section 4: Feature Analysis
+```python
+# Numerical features
+numerical_features = df.select_dtypes(include=[np.number]).columns
+print(f"\nNumerical features ({len(numerical_features)}): {list(numerical_features)}")
+
+# Distributions
+fig, axes = plt.subplots(len(numerical_features), 2, figsize=(12, 3*len(numerical_features)))
+for idx, col in enumerate(numerical_features[:5]):  # Top 5
+    axes[idx, 0].hist(df[col].dropna(), bins=30, edgecolor='black')
+    axes[idx, 0].set_title(f'{col} Distribution')
+
+    axes[idx, 1].boxplot(df[col].dropna())
+    axes[idx, 1].set_title(f'{col} Box Plot')
+
+plt.tight_layout()
+plt.show()
+
+# Categorical features
+categorical_features = df.select_dtypes(include=['object']).columns
+print(f"\nCategorical features ({len(categorical_features)}): {list(categorical_features)}")
+
+for col in categorical_features[:3]:  # Top 3
+    print(f"\n{col} value counts:")
+    print(df[col].value_counts())
+```
+
+### Section 5: Correlation Analysis
+```python
+# Correlation with target
+correlations = df.corr()[y.name if hasattr(y, 'name') else 'target'].sort_values(ascending=False)
+print("\nTop features by correlation with target:")
+print(correlations.head(10))
+print(correlations.tail(5))
+
+# Correlation heatmap
+plt.figure(figsize=(12, 10))
+sns.heatmap(df.corr(), cmap='coolwarm', center=0)
+plt.title('Feature Correlation Matrix')
+plt.tight_layout()
+plt.show()
+
+# Identify multicollinearity
+high_corr_pairs = []
+corr_matrix = df.corr()
+for i in range(len(corr_matrix.columns)):
+    for j in range(i+1, len(corr_matrix.columns)):
+        if abs(corr_matrix.iloc[i, j]) > 0.9:
+            high_corr_pairs.append((corr_matrix.columns[i], corr_matrix.columns[j]))
+
+if high_corr_pairs:
+    print("\n⚠️ High correlation pairs (>0.9):")
+    for col1, col2 in high_corr_pairs:
+        print(f"  - {col1} <-> {col2}")
+```
+
+### Section 6: Outlier Detection
+```python
+# Statistical outliers (IQR method)
+def detect_outliers_iqr(data, column, threshold=1.5):
+    Q1 = data[column].quantile(0.25)
+    Q3 = data[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - threshold * IQR
+    upper_bound = Q3 + threshold * IQR
+    return data[(data[column] < lower_bound) | (data[column] > upper_bound)]
+
+for col in numerical_features:
+    outliers = detect_outliers_iqr(df, col)
+    if len(outliers) > 0:
+        print(f"{col}: {len(outliers)} outliers ({len(outliers)/len(df)*100:.2f}%)")
+
+# Decision: Keep or remove outliers?
+# - Medical/sensor data: Often keep (they're real events)
+# - Financial data: May need to investigate
+# - Duplicate errors: Remove
+```
+
+### Section 7: Key Insights Summary
+```python
+insights = {
+    "total_samples": len(df),
+    "total_features": df.shape[1],
+    "missing_values": df.isnull().sum().sum(),
+    "duplicate_rows": df.duplicated().sum(),
+    "numerical_features": len(numerical_features),
+    "categorical_features": len(categorical_features),
+    "class_balance": "Balanced" if min(y.value_counts()) / len(y) > 0.4 else "Imbalanced"
+}
+
+print("\n" + "="*60)
+print("EDA SUMMARY")
+print("="*60)
+for key, value in insights.items():
+    print(f"{key}: {value}")
+
+print("\nKEY FINDINGS:")
+print("- [Your finding 1]")
+print("- [Your finding 2]")
+print("- [Your finding 3]")
+
+print("\nNEXT STEPS:")
+print("- [Preprocessing action 1]")
+print("- [Feature engineering idea 1]")
+print("- [Model strategy based on data]")
+```
+:::
+
+---
+
+## 2.3 Data Preprocessing Pipeline
+
+::: {.callout-important}
+## TASK 2.3: Build Preprocessing Pipeline
+
+Implementasikan preprocessing yang robust dan reproducible:
+
+```python
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer, KNNImputer
+import pandas as pd
+import numpy as np
+
+class DataPreprocessor:
+    """Comprehensive data preprocessing pipeline"""
+
+    def __init__(self):
+        self.categorical_features = []
+        self.numerical_features = []
+        self.preprocessor = None
+        self.feature_names = None
+
+    def fit(self, X, y=None):
+        """Fit preprocessor on training data"""
+
+        # Identify feature types
+        self.categorical_features = X.select_dtypes(include=['object']).columns.tolist()
+        self.numerical_features = X.select_dtypes(include=[np.number]).columns.tolist()
+
+        # Define preprocessing steps
+        numerical_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='median')),
+            ('scaler', StandardScaler())
+        ])
+
+        categorical_transformer = Pipeline(steps=[
+            ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
+            ('onehot', OneHotEncoder(handle_unknown='ignore'))
+        ])
+
+        # Combine transformers
+        self.preprocessor = ColumnTransformer(
+            transformers=[
+                ('num', numerical_transformer, self.numerical_features),
+                ('cat', categorical_transformer, self.categorical_features)
+            ])
+
+        X_processed = self.preprocessor.fit_transform(X)
+        return self
+
+    def transform(self, X):
+        """Transform data using fitted preprocessor"""
+        return self.preprocessor.transform(X)
+
+    def fit_transform(self, X):
+        """Fit and transform in one step"""
+        return self.fit(X).transform(X)
+
+
+# Usage
+preprocessor = DataPreprocessor()
+X_processed = preprocessor.fit_transform(X_train)
+X_test_processed = preprocessor.transform(X_test)
+
+print(f"Processed training shape: {X_processed.shape}")
+print(f"Processed test shape: {X_test_processed.shape}")
+
+# Save preprocessor for later use
+import joblib
+joblib.dump(preprocessor, 'preprocessor.pkl')
+```
+
+### Handle Class Imbalance (if applicable)
+```python
+from imblearn.over_sampling import SMOTE
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.pipeline import Pipeline as ImbPipeline
+
+# Check imbalance ratio
+print(f"Class distribution before SMOTE: {pd.Series(y_train).value_counts()}")
+
+# Apply SMOTE if imbalanced
+if (y_train.value_counts().min() / len(y_train)) < 0.4:
+    print("⚠️ Imbalanced data detected - applying SMOTE")
+
+    smote = SMOTE(sampling_strategy='minority', random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_processed, y_train)
+
+    print(f"Class distribution after SMOTE: {pd.Series(y_train_resampled).value_counts()}")
+else:
+    X_train_resampled, y_train_resampled = X_processed, y_train
+```
+
+### Train/Validation/Test Split
+```python
+from sklearn.model_selection import train_test_split, StratifiedKFold
+
+# Initial train/test split (80/20)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_processed, y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y if 'classification' in problem_type else None
+)
+
+# Further split train into train/val (75/25 of train = 60/20 overall)
+X_train, X_val, y_train, y_val = train_test_split(
+    X_train, y_train,
+    test_size=0.25,
+    random_state=42,
+    stratify=y_train if 'classification' in problem_type else None
+)
+
+print(f"Training set: {X_train.shape}")
+print(f"Validation set: {X_val.shape}")
+print(f"Test set: {X_test.shape}")
+
+# For reproducibility
+RANDOM_STATE = 42
+```
+:::
+
+---
+
+# BAGIAN 3: Model Development (2 Jam)
+
+## 3.1 Baseline Model
+
+::: {.callout-important}
+## TASK 3.1: Implement Baseline Model
+
+Baseline adalah checkpoint untuk evaluate progress:
+
+### Cybersecurity/Healthcare/NLP/CV Classification
+```python
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
+import numpy as np
+
+# Baseline: Logistic Regression (simplest classifier)
+baseline_model = LogisticRegression(
+    max_iter=1000,
+    random_state=42,
+    n_jobs=-1
+)
+
+baseline_model.fit(X_train, y_train)
+
+# Evaluate
+y_pred_baseline = baseline_model.predict(X_val)
+y_pred_proba_baseline = baseline_model.predict_proba(X_val)[:, 1]
+
+print("="*60)
+print("BASELINE MODEL: Logistic Regression")
+print("="*60)
+print(classification_report(y_val, y_pred_baseline))
+print(f"AUC-ROC: {roc_auc_score(y_val, y_pred_proba_baseline):.4f}")
+print(f"Confusion Matrix:\n{confusion_matrix(y_val, y_pred_baseline)}")
+
+# Store baseline metrics for comparison
+baseline_metrics = {
+    'model': 'Logistic Regression',
+    'accuracy': (y_pred_baseline == y_val).mean(),
+    'auc_roc': roc_auc_score(y_val, y_pred_proba_baseline),
+}
+```
+
+### Business Intelligence (Regression)
+```python
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+# Baseline: Linear Regression
+baseline_model = LinearRegression()
+baseline_model.fit(X_train, y_train)
+
+y_pred_baseline = baseline_model.predict(X_val)
+
+print("="*60)
+print("BASELINE MODEL: Linear Regression")
+print("="*60)
+print(f"MAE: {mean_absolute_error(y_val, y_pred_baseline):.4f}")
+print(f"RMSE: {np.sqrt(mean_squared_error(y_val, y_pred_baseline)):.4f}")
+print(f"R² Score: {r2_score(y_val, y_pred_baseline):.4f}")
+```
+:::
+
+---
+
+## 3.2 Model Experimentation Framework
+
+::: {.callout-important}
+## TASK 3.2: Systematic Model Comparison
+
+Buat experiment log yang terstruktur:
+
+```python
+import pandas as pd
+from datetime import datetime
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.svm import SVC
+from sklearn.model_selection import cross_validate
+from sklearn.metrics import *
+
+class ExperimentTracker:
+    """Track all model experiments systematically"""
+
+    def __init__(self):
+        self.experiments = []
+
+    def log_experiment(self, model_name, model, X_train, y_train, X_val, y_val,
+                      hyperparams=None, notes=""):
+        """Log one experiment"""
+
+        # Train
+        model.fit(X_train, y_train)
+
+        # Predict
+        y_pred = model.predict(X_val)
+        if hasattr(model, 'predict_proba'):
+            y_pred_proba = model.predict_proba(X_val)
+        else:
+            y_pred_proba = None
+
+        # Calculate metrics
+        metrics = {
+            'timestamp': datetime.now(),
+            'model_name': model_name,
+            'accuracy': accuracy_score(y_val, y_pred),
+            'precision': precision_score(y_val, y_pred, average='weighted'),
+            'recall': recall_score(y_val, y_pred, average='weighted'),
+            'f1': f1_score(y_val, y_pred, average='weighted'),
+        }
+
+        if y_pred_proba is not None:
+            metrics['auc_roc'] = roc_auc_score(y_val, y_pred_proba[:, 1])
+
+        metrics['hyperparams'] = hyperparams
+        metrics['notes'] = notes
+
+        self.experiments.append(metrics)
+
+        # Print summary
+        print(f"\n{'='*60}")
+        print(f"Experiment: {model_name}")
+        print(f"{'='*60}")
+        for key, val in metrics.items():
+            if key not in ['timestamp', 'hyperparams', 'notes']:
+                print(f"{key:15s}: {val:.4f}")
+        if notes:
+            print(f"Notes: {notes}")
+
+        return model
+
+    def get_best_model(self, metric='f1'):
+        """Return best model based on metric"""
+        df = pd.DataFrame(self.experiments)
+        best_idx = df[metric].idxmax()
+        return df.iloc[best_idx]
+
+    def summary_df(self):
+        """Return experiments as DataFrame"""
+        df = pd.DataFrame(self.experiments)
+        return df[['timestamp', 'model_name', 'accuracy', 'precision',
+                   'recall', 'f1', 'auc_roc', 'notes']].round(4)
+
+
+# Initialize tracker
+tracker = ExperimentTracker()
+
+# EXPERIMENT 1: Baseline (already done)
+tracker.experiments.append({
+    'timestamp': datetime.now(),
+    'model_name': 'Logistic Regression (Baseline)',
+    'accuracy': baseline_metrics['accuracy'],
+    'precision': 0.75,
+    'recall': 0.80,
+    'f1': 0.77,
+    'auc_roc': baseline_metrics['auc_roc'],
+    'hyperparams': {'C': 1.0, 'max_iter': 1000},
+    'notes': 'Baseline model'
+})
+
+# EXPERIMENT 2: Random Forest
+rf_model = tracker.log_experiment(
+    model_name='Random Forest',
+    model=RandomForestClassifier(
+        n_estimators=100,
+        max_depth=10,
+        random_state=42,
+        n_jobs=-1
+    ),
+    X_train=X_train, y_train=y_train,
+    X_val=X_val, y_val=y_val,
+    hyperparams={'n_estimators': 100, 'max_depth': 10},
+    notes='Initial RF with default hyperparams'
+)
+
+# EXPERIMENT 3: Gradient Boosting
+gb_model = tracker.log_experiment(
+    model_name='Gradient Boosting',
+    model=GradientBoostingClassifier(
+        n_estimators=100,
+        learning_rate=0.1,
+        max_depth=5,
+        random_state=42
+    ),
+    X_train=X_train, y_train=y_train,
+    X_val=X_val, y_val=y_val,
+    hyperparams={'n_estimators': 100, 'learning_rate': 0.1},
+    notes='GB with conservative learning rate'
+)
+
+# EXPERIMENT 4: SVM (untuk classification)
+svm_model = tracker.log_experiment(
+    model_name='Support Vector Machine',
+    model=SVC(kernel='rbf', C=1.0, probability=True, random_state=42),
+    X_train=X_train, y_train=y_train,
+    X_val=X_val, y_val=y_val,
+    hyperparams={'kernel': 'rbf', 'C': 1.0},
+    notes='SVM dengan RBF kernel'
+)
+
+# EXPERIMENT 5: Tuned Random Forest
+rf_tuned = tracker.log_experiment(
+    model_name='Random Forest (Tuned)',
+    model=RandomForestClassifier(
+        n_estimators=200,
+        max_depth=15,
+        min_samples_split=5,
+        min_samples_leaf=2,
+        random_state=42,
+        n_jobs=-1
+    ),
+    X_train=X_train, y_train=y_train,
+    X_val=X_val, y_val=y_val,
+    hyperparams={'n_estimators': 200, 'max_depth': 15, 'min_samples_split': 5},
+    notes='RF dengan hyperparameter tuning'
+)
+
+# Summary
+print("\n" + "="*80)
+print("EXPERIMENT SUMMARY")
+print("="*80)
+print(tracker.summary_df().to_string())
+
+best = tracker.get_best_model(metric='f1')
+print(f"\nBEST MODEL: {best['model_name']} with F1={best['f1']:.4f}")
+```
+:::
+
+---
+
+## 3.3 Hyperparameter Tuning
+
+::: {.callout-important}
+## TASK 3.3: Systematic Hyperparameter Optimization
+
+```python
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+import warnings
+warnings.filterwarnings('ignore')
+
+# Select best model from experiments
+# Let's assume Random Forest was best
+best_base_model = RandomForestClassifier(random_state=42)
+
+# Define hyperparameter grid
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [5, 10, 15, 20],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': ['sqrt', 'log2']
+}
+
+# Grid Search (for small grids)
+print("Starting GridSearchCV...")
+grid_search = GridSearchCV(
+    estimator=best_base_model,
+    param_grid=param_grid,
+    cv=5,  # 5-fold cross-validation
+    scoring='f1_weighted',
+    n_jobs=-1,
+    verbose=1
+)
+
+grid_search.fit(X_train, y_train)
+
+print(f"\nBest parameters: {grid_search.best_params_}")
+print(f"Best CV score: {grid_search.best_score_:.4f}")
+
+# Evaluate on validation set
+best_model = grid_search.best_estimator_
+y_pred_tuned = best_model.predict(X_val)
+y_pred_proba_tuned = best_model.predict_proba(X_val)
+
+print("\nTuned Model Validation Performance:")
+print(classification_report(y_val, y_pred_tuned))
+print(f"AUC-ROC: {roc_auc_score(y_val, y_pred_proba_tuned[:, 1]):.4f}")
+
+# Feature importance
+feature_importance = pd.DataFrame({
+    'feature': X_train.columns,
+    'importance': best_model.feature_importances_
+}).sort_values('importance', ascending=False)
+
+print("\nTop 10 Important Features:")
+print(feature_importance.head(10))
+
+# Visualize feature importance
+plt.figure(figsize=(10, 6))
+plt.barh(feature_importance['feature'][:15], feature_importance['importance'][:15])
+plt.xlabel('Importance')
+plt.title('Top 15 Feature Importances')
+plt.tight_layout()
+plt.show()
+```
+:::
+
+---
+
+## 3.4 Model Validation & Cross-Validation
+
+::: {.callout-important}
+## TASK 3.4: Robust Validation Strategy
+
+```python
+from sklearn.model_selection import cross_validate, StratifiedKFold
+
+# Use StratifiedKFold untuk classification (maintain class balance)
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+# Define scoring metrics
+scoring = {
+    'accuracy': 'accuracy',
+    'precision': 'precision_weighted',
+    'recall': 'recall_weighted',
+    'f1': 'f1_weighted',
+    'roc_auc': 'roc_auc_ovr_weighted'  # For multiclass
+}
+
+# Cross-validate best model
+cv_results = cross_validate(
+    best_model, X_train, y_train,
+    cv=skf,
+    scoring=scoring,
+    return_train_score=True,
+    n_jobs=-1
+)
+
+# Summary
+cv_summary = pd.DataFrame({
+    metric: f"{cv_results[f'test_{metric}'].mean():.4f} (+/- {cv_results[f'test_{metric}'].std():.4f})"
+    for metric in scoring.keys()
+})
+
+print("5-Fold Cross-Validation Results:")
+print(cv_summary)
+
+# Check for overfitting
+for metric in scoring.keys():
+    train_score = cv_results[f'train_{metric}'].mean()
+    test_score = cv_results[f'test_{metric}'].mean()
+    gap = train_score - test_score
+
+    if gap > 0.15:
+        print(f"⚠️ {metric}: Train-test gap = {gap:.4f} (possible overfitting)")
+    else:
+        print(f"✓ {metric}: Gap = {gap:.4f}")
+```
+:::
+
+---
+
+# BAGIAN 4: Deployment & Production (1.5 Jam)
+
+## 4.1 Model Serialization
+
+::: {.callout-important}
+## TASK 4.1: Save Model untuk Production
+
+```python
+import joblib
+import pickle
+from pathlib import Path
+
+# Create models directory
+models_dir = Path('models')
+models_dir.mkdir(exist_ok=True)
+
+# Save best model
+model_path = models_dir / f'best_model_v1.0.pkl'
+joblib.dump(best_model, model_path)
+print(f"✓ Model saved to {model_path}")
+
+# Save preprocessor
+preprocessor_path = models_dir / 'preprocessor.pkl'
+joblib.dump(preprocessor, preprocessor_path)
+print(f"✓ Preprocessor saved to {preprocessor_path}")
+
+# Save scaler if used
+if hasattr(best_model, 'named_steps'):
+    if 'scaler' in best_model.named_steps:
+        scaler_path = models_dir / 'scaler.pkl'
+        joblib.dump(best_model.named_steps['scaler'], scaler_path)
+
+# Create model metadata
+model_metadata = {
+    'model_type': type(best_model).__name__,
+    'version': '1.0',
+    'created_date': str(datetime.now()),
+    'hyperparameters': best_model.get_params(),
+    'feature_names': list(X_train.columns),
+    'target_classes': list(np.unique(y_train)),
+    'validation_metrics': {
+        'accuracy': float(accuracy_score(y_val, y_pred_tuned)),
+        'f1_score': float(f1_score(y_val, y_pred_tuned, average='weighted')),
+        'auc_roc': float(roc_auc_score(y_val, y_pred_proba_tuned[:, 1]))
+    }
+}
+
+import json
+metadata_path = models_dir / 'model_metadata.json'
+with open(metadata_path, 'w') as f:
+    json.dump(model_metadata, f, indent=2)
+
+print(f"✓ Model metadata saved to {metadata_path}")
+```
+:::
+
+---
+
+## 4.2 API Development (FastAPI)
+
+::: {.callout-important}
+## TASK 4.2: Build REST API for Model Serving
+
+Buat file `api/main.py`:
+
+```python
+"""
+FastAPI application untuk model serving
+"""
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import numpy as np
+import joblib
+import json
+from pathlib import Path
+from datetime import datetime
+import time
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="ML Capstone Model API",
+    description="Production-ready model serving API",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Load model and preprocessor
+models_dir = Path('models')
+model = joblib.load(models_dir / 'best_model_v1.0.pkl')
+preprocessor = joblib.load(models_dir / 'preprocessor.pkl')
+
+with open(models_dir / 'model_metadata.json') as f:
+    metadata = json.load(f)
+
+# Define input schema
+class PredictionRequest(BaseModel):
+    """Input features untuk prediction"""
+    features: dict  # Dictionary of feature names to values
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "features": {
+                    "feature1": 0.5,
+                    "feature2": 1.2,
+                    "feature3": "category_a"
+                }
+            }
+        }
+
+class PredictionResponse(BaseModel):
+    """Prediction response"""
+    prediction: int
+    confidence: float
+    probabilities: dict
+    inference_time_ms: float
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize on startup"""
+    print("✓ Model loaded successfully")
+    print(f"  Model type: {metadata['model_type']}")
+    print(f"  Version: {metadata['version']}")
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "model_loaded": True,
+        "version": metadata['version']
+    }
+
+@app.get("/info")
+async def get_info():
+    """Get model information"""
+    return {
+        "model_type": metadata['model_type'],
+        "features": metadata['feature_names'],
+        "target_classes": metadata['target_classes'],
+        "metrics": metadata['validation_metrics']
+    }
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict(request: PredictionRequest):
+    """
+    Make prediction on input features
+
+    Example:
+    {
+        "features": {
+            "age": 35,
+            "income": 50000,
+            "credit_score": 750
+        }
+    }
+    """
+    try:
+        # Convert input to DataFrame
+        import pandas as pd
+        X = pd.DataFrame([request.features])
+
+        # Preprocess
+        X_processed = preprocessor.transform(X)
+
+        # Measure inference time
+        start = time.time()
+        prediction = model.predict(X_processed)[0]
+        probabilities = model.predict_proba(X_processed)[0]
+        inference_time = (time.time() - start) * 1000
+
+        # Format response
+        prob_dict = {
+            str(cls): float(prob)
+            for cls, prob in zip(metadata['target_classes'], probabilities)
+        }
+
+        return PredictionResponse(
+            prediction=int(prediction),
+            confidence=float(probabilities[prediction]),
+            probabilities=prob_dict,
+            inference_time_ms=inference_time
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/predict/batch")
+async def predict_batch(requests: list[PredictionRequest]):
+    """Batch prediction"""
+    results = []
+    for req in requests:
+        result = await predict(req)
+        results.append(result)
+    return {
+        "predictions": results,
+        "count": len(results)
+    }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000
+    )
+```
+
+Buat file `api/requirements.txt`:
+
+```
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+scikit-learn==1.3.2
+pandas==2.1.3
+numpy==1.24.3
+joblib==1.3.2
+```
+
+Test API:
+
+```bash
+# Install dependencies
+pip install -r api/requirements.txt
+
+# Run server
+python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+
+# In another terminal, test endpoint
+curl -X POST "http://localhost:8000/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"features": {"age": 35, "income": 50000}}'
+```
+:::
+
+---
+
+## 4.3 Docker Containerization
+
+::: {.callout-important}
+## TASK 4.3: Create Dockerfile
+
+Buat `Dockerfile`:
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY api/requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY api/ .
+COPY models/ models/
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+
+# Run application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Buat `.dockerignore`:
+
+```
+__pycache__
+*.pyc
+*.pyo
+.env
+.venv
+.git
+tests/
+*.md
+.ipynb_checkpoints
+```
+
+Build dan run:
+
+```bash
+# Build image
+docker build -t capstone-model:latest .
+
+# Run container
+docker run -p 8000:8000 capstone-model:latest
+
+# Or use docker-compose (buat docker-compose.yml)
+version: '3.8'
+services:
+  model-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+```
+:::
+
+---
+
+## 4.4 Model Monitoring & Documentation
+
+::: {.callout-important}
+## TASK 4.4: Create Model Card
+
+Buat `models/MODEL_CARD.md`:
+
+```markdown
+# Model Card: [Project Name] v1.0
+
+## Model Details
+- **Model Type**: [e.g., Random Forest Classifier]
+- **Framework**: scikit-learn
+- **Training Date**: [Date]
+- **Version**: 1.0
+- **Authors**: [Your Name]
+
+## Intended Use
+- **Primary Use**: [What is the model used for?]
+- **Primary Users**: [Who will use it?]
+- **Out-of-Scope Uses**: [What shouldn't it be used for?]
+
+## Performance Metrics
+| Metric | Value |
+|--------|-------|
+| Accuracy | 0.87 |
+| Precision | 0.85 |
+| Recall | 0.89 |
+| F1-Score | 0.87 |
+| AUC-ROC | 0.92 |
+
+## Data
+- **Training Data**: [n samples, m features]
+- **Data Source**: [Where data came from]
+- **Preprocessing**: [What preprocessing was done]
+- **Class Distribution**: [If applicable]
+
+## Limitations
+- [Limitation 1]
+- [Limitation 2]
+- [Limitation 3]
+
+## Deployment Considerations
+- **Inference Latency**: <100ms per request
+- **Memory Usage**: ~50MB
+- **Docker Image Size**: ~500MB
+```
+:::
+
+---
+
+# BAGIAN 5: Presentation & Reporting (0.5 Jam)
+
+## 5.1 Technical Report
+
+::: {.callout-important}
+## TASK 5.1: Write Technical Report
+
+Buat `TECHNICAL_REPORT.md` (15-25 pages):
+
+```markdown
+# Technical Report: [Project Title]
+
+## 1. Executive Summary
+[1 page - high-level overview, key findings, recommendations]
+
+## 2. Introduction
+- Problem context and motivation
+- Why this problem matters
+- Research questions
+- Contributions of this work
+
+## 3. Literature Review
+- Related work and existing solutions
+- State-of-the-art approaches
+- How your work differs
+
+## 4. Methodology
+### 4.1 Problem Formulation
+[Mathematical definition of the problem]
+
+### 4.2 Approach
+[Describe your ML pipeline]
+- Data preprocessing
+- Feature engineering
+- Model selection
+- Evaluation methodology
+
+### 4.3 Evaluation Metrics
+[Explain choice of metrics and how they're calculated]
+
+## 5. Data Description
+- Dataset characteristics
+- Data collection and preprocessing
+- Feature engineering decisions
+- Data splits (train/val/test)
+- Class distribution analysis
+
+## 6. Results
+### 6.1 Model Comparison
+[Table comparing all models tried]
+
+### 6.2 Best Model Performance
+[Detailed results for best model]
+
+### 6.3 Ablation Studies
+[Impact of different components]
+
+### 6.4 Visualizations
+[Confusion matrix, ROC curve, feature importance]
+
+## 7. Analysis & Discussion
+- Why did the model work/fail?
+- Key findings and insights
+- Error analysis
+- Limitations of the approach
+
+## 8. Deployment & Production Considerations
+- Model serialization strategy
+- API design and latency analysis
+- Containerization and scalability
+- Monitoring and retraining strategy
+
+## 9. Conclusion
+- Summary of findings
+- Practical implications
+- Future work directions
+
+## 10. References
+[Academic and technical references]
+```
+:::
+
+---
+
+## 5.2 Presentation Preparation
+
+::: {.callout-important}
+## TASK 5.2: Prepare Final Presentation
+
+**Slide Count: 14-16 slides, Duration: 15-20 minutes**
+
+**Suggested Outline:**
+
+**Slide 1:** Title & Introduction
+- Project title
+- Your name and date
+- University logo
+
+**Slide 2:** Problem Statement
+- What problem are you solving?
+- Why does it matter?
+- Business impact
+
+**Slide 3:** Solution Overview
+- Your approach in one sentence
+- Key innovation (if any)
+
+**Slide 4:** Data Overview
+- Data size (n samples, m features)
+- Class distribution
+- Key data characteristics
+
+**Slide 5-6:** Methodology
+- ML pipeline diagram
+- Preprocessing steps
+- Model selection rationale
+
+**Slide 7-9:** Results
+- Model comparison table
+- Best model metrics
+- ROC/Precision-Recall curves
+
+**Slide 10:** Feature Importance
+- Top 10 important features
+- Interpretability insights
+
+**Slide 11:** Deployment & Demo
+- API overview
+- Live demo or demo video
+- Or screenshot of API in action
+
+**Slide 12:** Limitations
+- Known limitations
+- When model might fail
+- Honest assessment
+
+**Slide 13:** Future Work
+- Next steps for improvement
+- Potential extensions
+- Deployment roadmap
+
+**Slide 14:** Conclusion
+- Key takeaways
+- Thank you slide
+
+**Presentation Tips:**
+
+- Practice 3+ times before presentation
+- Keep slides minimal (visuals > text)
+- Prepare for common questions
+- Have code available for reference
+- Time yourself (target: 15-18 minutes + 2-3 min Q&A)
+:::
+
+---
+
+## Summary & Deliverables Checklist
+
+::: {.callout-important}
+## ✅ FINAL CHECKLIST
+
+### Code & Implementation
+- [ ] Jupyter notebook dengan complete pipeline
+- [ ] All code runs without errors
+- [ ] Proper error handling and validation
+- [ ] Comments explaining key steps
+- [ ] No hardcoded paths or credentials
+- [ ] requirements.txt dengan pinned versions
+
+### Data & Analysis
+- [ ] Dataset loaded and described
+- [ ] EDA report dengan insights
+- [ ] Data preprocessing documented
+- [ ] Train/val/test splits reproducible
+- [ ] Missing values and outliers handled
+
+### Model Development
+- [ ] Baseline model implemented
+- [ ] 3+ models compared systematically
+- [ ] Hyperparameter tuning documented
+- [ ] Cross-validation performed
+- [ ] Best model selected with justification
+
+### Deployment
+- [ ] Model serialized and saved
+- [ ] API endpoints working
+- [ ] Docker image builds successfully
+- [ ] Health checks implemented
+- [ ] API documentation complete
+
+### Documentation
+- [ ] Project Proposal filled out
+- [ ] README.md complete
+- [ ] Model Card written
+- [ ] Technical report finished
+- [ ] Code comments and docstrings
+
+### Presentation
+- [ ] Slides prepared (14-16 slides)
+- [ ] Presentation practiced 3+ times
+- [ ] Demo tested and working
+- [ ] Q&A answers prepared
+- [ ] Submitted on time
+
+### Git Repository
+- [ ] All files committed
+- [ ] Clean commit history
+- [ ] .gitignore configured
+- [ ] No large files in repo
+- [ ] README at repository root
+
+### Final Quality Check
+- [ ] Code follows PEP 8 style
+- [ ] No obvious bugs or warnings
+- [ ] Results reproducible
+- [ ] All metrics reported
+- [ ] Professional presentation quality
+:::
+
+---
+
+## Selamat!
+
+Anda telah menyelesaikan journey machine learning yang komprehensif!
+
+**Apa yang telah Anda pelajari:**
+
+1. **CPMK-1**: Fundamental ML concepts dan aplikasinya
+2. **CPMK-2**: End-to-end ML pipelines dengan best practices
+3. **CPMK-3**: Critical evaluation dan validation strategies
+4. **CPMK-4**: Advanced techniques dan model optimization
+5. **CPMK-5**: Production ML systems dan deployment
+
+---
+
+## References & Resources
+
+**Capstone Project Guides:**
+
+- Bab 14: Panduan Capstone Project & Best Practices
+
+**Related Labs:**
+
+- Lab 11: Model Deployment
+- Lab 10: Model Evaluation
+- Lab 1-9: Foundation topics
+
+**Datasets:**
+
+- [Kaggle Datasets](https://kaggle.com/datasets)
+- [UCI ML Repository](https://archive.ics.uci.edu/ml)
+- [Google Dataset Search](https://datasetsearch.research.google.com)
+
+**Tools & Libraries:**
+
+- [scikit-learn Documentation](https://scikit-learn.org)
+- [FastAPI Documentation](https://fastapi.tiangolo.com)
+- [Docker Documentation](https://docs.docker.com)
+- [Pandas Documentation](https://pandas.pydata.org)
+
+---
+
+**Good luck dengan capstone project Anda!** 🚀
+
+Ingat: Kualitas > kuantitas. Fokus pada solusi yang solid dan well-documented daripada fitur banyak tapi tidak selesai.
+
+Anda siap!

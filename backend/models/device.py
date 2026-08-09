@@ -7,7 +7,7 @@ from backend.database.base import Base, TimestampMixin
 
 
 class Device(TimestampMixin, Base):
-    """Registered ESP8266 device and Schnorr public key."""
+    """Registered IoT device and Schnorr public key."""
 
     __tablename__ = "devices"
 

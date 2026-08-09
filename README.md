@@ -1,185 +1,265 @@
-# VoiceGuard-ZKP
+# VoiceGuard ZKP
 
-Sistem deteksi kondisi darurat berbasis suara yang menggabungkan ESP8266, autentikasi Schnorr Zero-Knowledge Proof, Whisper untuk speech-to-text, BERT untuk klasifikasi, Telegram untuk notifikasi cepat, dan dashboard web untuk monitoring.
+Proyek ini mendeteksi ucapan darurat pekerja menggunakan perangkat ESP32-S3 dan mikrofon INMP441. Audio dikirim ke FastAPI setelah perangkat lolos autentikasi Schnorr Zero-Knowledge Proof (ZKP), diubah menjadi teks bahasa Indonesia oleh faster-whisper, dikoreksi, lalu diklasifikasikan sebagai `Normal` atau `Emergency` oleh IndoBERT. Hasil akhirnya ditampilkan pada dashboard monitoring dan dikirim kembali ke perangkat untuk mengendalikan buzzer.
 
-## Overview
-
-- Device ESP8266 mengirim audio setelah autentikasi berhasil
-- Backend FastAPI memproses audio dan menyimpan hasil analisis
-- Whisper mengubah audio menjadi teks
-- BERT menentukan apakah pesan masuk kategori `Emergency` atau `Normal`
-- Telegram dikirim saat kondisi darurat terdeteksi
-- Dashboard web menampilkan perangkat aktif dan event terbaru
-
-## Visual Documentation
-
-### Dashboard
-
-![Dashboard](docs/images/dashboard.png)
-
-### Flowchart
-
-![Flowchart](docs/images/flowchart.png)
-
-### Prototype
-
-![Prototype](docs/images/prototype.jpg)
-
-## Project Structure
+## Tiga Bagian Utama
 
 ```text
-backend/
-  api/              FastAPI router, schemas, and dependencies
-  auth/             Challenge-response auth, token, and middleware
-  zkp/              Schnorr parameters, challenge generator, verifier, validator
-  speech/           Whisper speech-to-text service
-  bert/             HuggingFace BERT classification service
-  telegram/         Telegram notification service
-  database/         SQLAlchemy engine, session, and Base
-  models/           SQLite ORM models
-  repositories/     Data access layer
-  services/         Application use cases
-  utils/            Logging, exception handler, filesystem helpers
-  uploads/          Stored audio files
-  logs/             Application logs
-firmware/esp8266/   PlatformIO firmware for NodeMCU ESP8266
-dataset_ml/         Cleaned datasets for training
-tests/              Pytest test suite
+machine_learning/
+|-- dataset/                 Data final, notebook, dan runner fine-tuning
+|-- backend/                 FastAPI, ZKP, Whisper, IndoBERT, database, dan tests
+|-- frontend/                Firmware perangkat, materi UI, dan dokumentasi visual
+|-- Paparan/                 Laporan dan materi capstone
+|-- .env                     Konfigurasi lokal dan rahasia, tidak masuk Git
+|-- .env.example             Contoh konfigurasi
+|-- requirements.txt         Pintu instalasi dependensi backend
+|-- run_backend_lan.bat      Menjalankan server dari Command Prompt
+|-- run_backend_lan.ps1      Menjalankan server dari PowerShell
+`-- README.md                Dokumentasi utama proyek
 ```
 
-## Core Features
+Folder `tmp/`, `output/`, cache, database, log, upload audio, konfigurasi perangkat lokal, dan bobot model berukuran besar tetap disimpan lokal tetapi tidak dimasukkan ke Git.
 
-- Schnorr authentication for ESP8266
-- Audio upload and server-side proof generation
-- Whisper transcription
-- BERT text classification
-- Telegram emergency alert
-- Web monitoring dashboard
-- SQLite-based persistence for devices, audio, transcript, classification, and notification
+Struktur rinci tersedia pada:
 
-## Installation
+- [`PETA_KODE_PROYEK.md`](PETA_KODE_PROYEK.md) - nama mudah dan fungsi setiap folder/file untuk demonstrasi kode
+- [`dataset/README.md`](dataset/README.md)
+- [`backend/README.md`](backend/README.md)
+- [`backend/CODE_WALKTHROUGH.md`](backend/CODE_WALKTHROUGH.md)
+- [`frontend/README.md`](frontend/README.md)
 
-Use Python 3.12.
+## Arsitektur Sistem
 
-```bash
+```text
+Suara pekerja
+    |
+    v
+INMP441 -> ESP32-S3 -> Schnorr ZKP -> FastAPI
+                                      |
+                                      v
+                              Penyimpanan audio WAV
+                                      |
+                                      v
+                           faster-whisper bahasa Indonesia
+                                      |
+                                      v
+                              Koreksi teks terbatas
+                                      |
+                                      v
+                            IndoBERT Normal/Emergency
+                                |                 |
+                                v                 v
+                         Dashboard hijau     Dashboard merah
+                                                  |
+                                                  v
+                                         Buzzer pada ESP32-S3
+```
+
+## Mekanisme Utama
+
+1. ESP32-S3 terhubung ke Wi-Fi dan membaca audio digital dari INMP441.
+2. Perangkat meminta challenge ZKP menggunakan ID dan commitment.
+3. Backend memverifikasi proof tanpa menerima secret key perangkat.
+4. Perangkat yang valid memperoleh token autentikasi sementara.
+5. Audio direkam dalam chunk tiga detik dan dikirim sebagai WAV 16 kHz mono.
+6. Backend menolak audio yang tidak memiliki aktivitas suara memadai.
+7. faster-whisper mentranskripsikan audio dengan bahasa Indonesia.
+8. Auto-correct memperbaiki kata yang dekat dengan kosakata penting secara terbatas.
+9. IndoBERT memberi label `Normal` atau `Emergency` beserta confidence.
+10. Aturan deteksi memakai confidence tinggi satu chunk atau dua chunk berurutan.
+11. Dashboard membaca event terbaru setiap satu detik dan mengganti keadaan visual.
+12. Backend mengirim hasil dan server proof ke ESP32-S3.
+13. Buzzer menyala hanya saat keputusan akhir adalah emergency.
+
+## Perangkat Keras Utama
+
+| Komponen | Fungsi | Pin ESP32-S3 |
+|---|---|---|
+| INMP441 SD | Data audio I2S | GPIO 16 |
+| INMP441 WS | Word select/LRCL | GPIO 17 |
+| INMP441 SCK | Bit clock I2S | GPIO 18 |
+| INMP441 VDD | Catu daya | 3V3 |
+| INMP441 GND | Ground | GND |
+| INMP441 L/R | Kanal kiri | GND |
+| LED | Indikator perekaman | GPIO 12 |
+| Buzzer | Alarm emergency | GPIO 9 |
+
+Firmware aktif berada di:
+
+```text
+frontend/firmware/esp32_inmp441/esp32_inmp441_emergency_detector/
+```
+
+## Persiapan Backend
+
+Jalankan perintah berikut dari root proyek (Python 3.11 atau 3.12 direkomendasikan).
+
+```powershell
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-Whisper requires `ffmpeg` to be available in `PATH`.
+Pastikan `.env` minimal menunjuk ke aset lokal berikut:
 
-## Configuration
-
-Edit `.env` with your environment values:
-
-```text
+```env
 DATABASE_URL=sqlite:///./backend/database/app.db
 UPLOAD_DIR=backend/uploads
 LOG_DIR=backend/logs
-TELEGRAM_BOT_TOKEN=
-TELEGRAM_CHAT_ID=
-EMERGENCY_THRESHOLD=0.8
-WHISPER_MODEL_NAME=base
-WHISPER_LANGUAGE=
-WHISPER_DEVICE=cpu
-BERT_MODEL_NAME=bert-base-uncased
-BERT_DEVICE=cpu
-BERT_EMERGENCY_LABELS=Emergency,EMERGENCY,LABEL_1
-BERT_NORMAL_LABELS=Normal,NORMAL,LABEL_0
+WHISPER_ENGINE=faster-whisper
+WHISPER_MODEL_PATH=backend/models/faster-whisper-small
+WHISPER_LANGUAGE=id
+BERT_MODEL_NAME=backend/bert/trained_model_indobert_full
 ```
 
-For the ESP8266 demo, register the device using public key `9` if `DEVICE_SECRET_KEY=5` in the firmware.
+Jangan membagikan `.env` karena dapat berisi password Wi-Fi, token, atau secret aplikasi.
 
-## Run Backend
+### Menyiapkan Model ML
 
-```bash
-uvicorn backend.main:app --reload
+Bobot model lokal tidak dilacak oleh Git karena setiap file berukuran sekitar 418-475 MB, melebihi batas file biasa GitHub. Struktur dan metadata model tetap dipertahankan. Pada komputer baru:
+
+1. Letakkan model IndoBERT hasil fine-tuning di `backend/bert/trained_model_indobert_full/`.
+2. Letakkan model CTranslate2 Whisper di `backend/models/faster-whisper-small/`, atau kosongkan `WHISPER_MODEL_PATH` agar faster-whisper mengunduh model bernama `WHISPER_MODEL_NAME` saat pertama dijalankan.
+3. Pastikan `BERT_MODEL_NAME` dan `WHISPER_MODEL_PATH` di `.env` menunjuk ke lokasi tersebut.
+
+Jika bobot perlu dibagikan bersama proyek, gunakan Git LFS atau GitHub Release, bukan commit Git biasa.
+
+## Menjalankan Backend
+
+```powershell
+.\run_backend_lan.ps1
 ```
 
-Swagger UI:
+Alternatif dari Command Prompt adalah `run_backend_lan.bat`. Kedua launcher memakai environment pengembangan lokal yang sudah ada, lalu `.venv`, lalu Python dari `PATH`. Variabel `VOICEGUARD_PYTHON` dapat digunakan untuk memilih executable Python secara eksplisit.
+
+Alamat yang digunakan:
+
+| Layanan | Alamat |
+|---|---|
+| Dashboard | `http://localhost:8000/dashboard` |
+| Dokumentasi API | `http://localhost:8000/docs` |
+| Health check | `http://localhost:8000/api/health` |
+| Backend untuk ESP32 | `http://IP-LAPTOP:8000` |
+
+Cari IP laptop dengan:
+
+```powershell
+ipconfig
+```
+
+Gunakan nilai IPv4 Wi-Fi pada `SERVER_BASE_URL` di firmware. ESP32-S3 dan laptop harus berada pada jaringan yang sama.
+
+## Registrasi Perangkat
+
+Prototype Schnorr memakai parameter demo `p=23`, `q=11`, dan `g=2`. Secret perangkat `x=5` menghasilkan public key perangkat `y=9`, sedangkan public key server untuk server proof adalah `13`. Daftarkan perangkat satu kali melalui Swagger atau request berikut:
+
+```powershell
+$body = @{
+  device_id = "esp32s3-inmp441-worker-01"
+  name = "ESP32-S3 INMP441 Worker 01"
+  public_key = "9"
+  location = "Ruang 1"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method Post `
+  -Uri "http://localhost:8000/api/devices" `
+  -ContentType "application/json" `
+  -Body $body
+```
+
+Respons `409 Conflict` berarti ID tersebut sudah terdaftar dan tidak perlu dibuat lagi.
+
+## Upload Firmware
+
+1. Buka file `.ino` di Arduino IDE.
+2. Salin `config.example.h` menjadi `config.h`, lalu isi `WIFI_SSID`, `WIFI_PASSWORD`, dan `SERVER_BASE_URL` lokal.
+3. Pilih board ESP32-S3 yang sesuai.
+4. Pastikan pin INMP441, LED, dan buzzer sesuai tabel.
+5. Compile lalu upload firmware.
+6. Buka Serial Monitor pada baud rate yang ditentukan firmware.
+7. Mulai berbicara saat LED indikator perekaman menyala.
+
+## Menjalankan Fine-Tuning IndoBERT
+
+Notebook dapat dibuka langsung:
 
 ```text
-http://127.0.0.1:8000/docs
+dataset/train_bert_final_dataset.ipynb
 ```
 
-Main endpoints:
+Atau jalankan runner:
 
-```text
-GET  /api/health
-POST /api/devices
-POST /challenge
-POST /verify
-POST /api/process/audio
-GET  /dashboard
-GET  /api/monitoring/overview
-GET  /api/monitoring/events
+```powershell
+python dataset\run_full_finetune_indobert.py
 ```
 
-## Run ESP8266
+Untuk memantau log secara terus-menerus:
 
-Firmware source for Arduino IDE:
-
-```text
-firmware/esp8266/esp8266_emergency_detector.ino
+```powershell
+Get-Content dataset\full_finetune_indobert_runner.log -Wait
 ```
 
-Steps:
+Model hasil training ditempatkan di `backend/bert/trained_model_indobert_full` dan dipilih melalui `BERT_MODEL_NAME` pada `.env`.
 
-1. Open `firmware/esp8266/include/config.h`
-2. Fill `WIFI_SSID`, `WIFI_PASSWORD`, and `SERVER_BASE_URL`
-3. Make sure Schnorr parameters match the backend
-4. Build and upload with PlatformIO
+## Menjalankan Pengujian
 
-```bash
-cd firmware/esp8266
-pio run --target upload
-pio device monitor
+```powershell
+$env:TMP="$PWD\.tmp_pytest"
+$env:TEMP="$PWD\.tmp_pytest"
+python -m pytest -q
 ```
 
-## Dataset
+Pengujian meliputi API, ZKP, token, preprocessing audio, auto-correct bahasa Indonesia, aturan keyword darurat, dan pipeline klasifikasi.
 
-Prepared training datasets are stored in `dataset_ml/`.
+## Keadaan Dashboard
 
-Recommended format for training:
+- **Hijau:** event terbaru diklasifikasikan sebagai `Normal`.
+- **Merah:** event terbaru diklasifikasikan sebagai `Emergency`.
+- **Abu-abu:** browser tidak dapat menghubungi backend.
+- Lokasi perangkat sementara ditampilkan sebagai **Ruang 1**.
+- Jam menggunakan zona **Asia/Jakarta (WIB)**.
 
-```text
-text,label
-help fire in area,Emergency
-everything is normal,Normal
+## Batasan Prototype
+
+- Audio dan klasifikasi hanya difokuskan pada bahasa Indonesia.
+- Klasifikasi hanya memiliki kelas `Normal` dan `Emergency`.
+- ZKP menggunakan bilangan kecil untuk demonstrasi, bukan keamanan produksi.
+- Sistem membutuhkan Wi-Fi dan backend aktif.
+- Sistem hanya memberi peringatan dan tidak menggantikan tindakan petugas.
+- Kualitas transkripsi tetap dipengaruhi jarak bicara, kebisingan, pemasangan mikrofon, dan kualitas jaringan.
+
+## Troubleshooting Singkat
+
+### Port 8000 sudah digunakan
+
+```powershell
+Get-NetTCPConnection -LocalPort 8000 | Select-Object OwningProcess
 ```
 
-## Testing
+Hentikan hanya proses backend lama yang memang tidak dipakai, atau jalankan server di port lain.
 
-Run the test suite with:
+### ESP32 tidak dapat upload
 
-```bash
-pytest
-```
+- Pastikan IP server pada firmware benar.
+- Izinkan Python/port 8000 pada Windows Firewall.
+- Pastikan laptop dan ESP32 menggunakan Wi-Fi yang sama.
+- Pastikan backend menampilkan `Application startup complete`.
 
-Tests cover:
+### Buzzer tidak menyala
 
-- Schnorr proof verification
-- Auth token flow
-- Health endpoint
-- OpenAPI route availability
-- ML pipeline using fake Whisper, fake BERT, and fake Telegram
+- Pastikan hasil akhir backend benar-benar `Emergency`.
+- Periksa polaritas buzzer dan kesamaan ground.
+- Uji GPIO 9 menggunakan LED sebelum memasang buzzer kembali.
 
-## Production Notes
+### Transkripsi kurang tepat
 
-The current Schnorr parameters are for prototype use only. For production, use reviewed large cryptographic parameters, secure secrets, HTTPS, token rotation, a fine-tuned BERT model, and stronger audio validation.
+- Bicara 15-30 cm dari INMP441.
+- Arahkan lubang mikrofon ke pembicara.
+- Hindari menutup sensor atau meletakkannya dekat buzzer.
+- Periksa statistik audio pada Serial Monitor dan log backend.
 
-## Repository Upload Notes
+## Catatan Komentar Kode
 
-If you want a clean GitHub upload flow, see:
-
-```text
-docs/guides/upload-github.md
-```
-
-And if you need runtime instructions:
-
-```text
-docs/guides/running-project.md
-```
+Komentar mengikuti sintaks bahasa masing-masing: Python memakai `#` dan docstring, Arduino/JavaScript memakai `//`, HTML memakai `<!-- -->`, serta CSS memakai `/* */`. Komentar ditempatkan per blok logika agar kode tetap valid dan lebih mudah dijelaskan; komentar pada setiap baris sederhana sengaja dihindari karena dapat menutupi alur program.

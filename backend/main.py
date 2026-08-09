@@ -18,17 +18,27 @@ from backend.api.v1.monitoring import dashboard as monitoring_dashboard
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Prepare runtime directories, logging, and database tables."""
+    # Semua direktori dan tabel disiapkan sebelum server menerima request.
     settings = get_settings()
     ensure_runtime_directories(settings)
     configure_logging(settings)
     create_database()
+    if settings.preload_ml_models:
+        # Warm-up memindahkan biaya load model ke startup agar request pertama lebih cepat.
+        from backend.api.dependencies import (
+            get_speech_to_text_service,
+            get_text_classification_service,
+        )
+
+        get_speech_to_text_service().warm_up()
+        get_text_classification_service().warm_up()
     yield
 
 
 app = FastAPI(
     title="Secure Voice-Based Emergency Detection System",
     description=(
-        "IoT emergency detection backend using ESP8266 authentication, "
+        "IoT emergency detection backend using registered device authentication, "
         "Schnorr ZKP, Whisper speech-to-text, BERT classification, "
         "Telegram notification, and server proof verification."
     ),
@@ -46,6 +56,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Token middleware melindungi seluruh endpoint pemrosesan audio.
 settings = get_settings()
 app.add_middleware(
     AuthenticationMiddleware,
@@ -53,6 +64,7 @@ app.add_middleware(
     protected_prefixes=("/api/process", "/process"),
 )
 
+# Router dan exception handler dipasang setelah konfigurasi aplikasi selesai.
 app.add_exception_handler(AppError, app_error_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
 app.include_router(api_router)

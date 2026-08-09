@@ -16,15 +16,33 @@ class Settings(BaseSettings):
 
     app_env: str = Field(default="development", alias="APP_ENV")
     debug: bool = Field(default=True, alias="DEBUG")
+    preload_ml_models: bool = Field(default=True, alias="PRELOAD_ML_MODELS")
     database_url: str = Field(default="sqlite:///./backend/database/app.db", alias="DATABASE_URL")
     upload_dir: Path = Field(default=Path("backend/uploads"), alias="UPLOAD_DIR")
     log_dir: Path = Field(default=Path("backend/logs"), alias="LOG_DIR")
     telegram_bot_token: str | None = Field(default=None, alias="TELEGRAM_BOT_TOKEN")
     telegram_chat_id: str | None = Field(default=None, alias="TELEGRAM_CHAT_ID")
     emergency_threshold: float = Field(default=0.8, alias="EMERGENCY_THRESHOLD")
-    whisper_model_name: str = Field(default="base", alias="WHISPER_MODEL_NAME")
+    emergency_high_confidence_threshold: float = Field(
+        default=0.85,
+        alias="EMERGENCY_HIGH_CONFIDENCE_THRESHOLD",
+    )
+    whisper_engine: str = Field(default="faster-whisper", alias="WHISPER_ENGINE")
+    whisper_model_name: str = Field(default="small", alias="WHISPER_MODEL_NAME")
+    whisper_model_path: Path | None = Field(default=None, alias="WHISPER_MODEL_PATH")
     whisper_language: str | None = Field(default=None, alias="WHISPER_LANGUAGE")
     whisper_device: str = Field(default="cpu", alias="WHISPER_DEVICE")
+    whisper_compute_type: str = Field(default="float32", alias="WHISPER_COMPUTE_TYPE")
+    whisper_beam_size: int = Field(default=5, alias="WHISPER_BEAM_SIZE")
+    whisper_no_speech_threshold: float = Field(default=0.6, alias="WHISPER_NO_SPEECH_THRESHOLD")
+    whisper_initial_prompt: str | None = Field(
+        default=(
+            "Percakapan keselamatan kerja bahasa Indonesia. Kosakata: tolong, "
+            "kebakaran, kecelakaan, darurat, bantuan, terluka, pingsan, banjir, "
+            "gempa, ledakan, evakuasi."
+        ),
+        alias="WHISPER_INITIAL_PROMPT",
+    )
     bert_model_name: str = Field(default="bert-base-uncased", alias="BERT_MODEL_NAME")
     bert_device: str = Field(default="cpu", alias="BERT_DEVICE")
     bert_emergency_labels: str = Field(

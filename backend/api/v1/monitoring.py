@@ -12,402 +12,434 @@ _DASHBOARD_HTML = """<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monitoring Dashboard</title>
+  <title>Monitoring Dashboard | Pusat Monitoring Keselamatan</title>
   <style>
+    /* Token warna berubah otomatis antara kondisi normal, emergency, dan offline. */
     :root {
-      color-scheme: dark;
-      --bg: #08101f;
-      --panel: rgba(13, 18, 30, 0.82);
-      --line: rgba(148, 163, 184, 0.14);
-      --text: #edf2ff;
-      --muted: #93a4bd;
-      --good: #2dd4bf;
-      --warn: #fbbf24;
-      --bad: #fb7185;
-      --blue: #60a5fa;
-      --shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
-      --radius: 22px;
+      color-scheme: light;
+      --bg: #f4f7f9;
+      --surface: #ffffff;
+      --text: #14213d;
+      --muted: #64748b;
+      --line: #dce5ea;
+      --green: #07884a;
+      --green-soft: #eaf8f0;
+      --red: #e11d2e;
+      --red-soft: #fff0f1;
+      --blue: #2563eb;
+      --shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+      --radius: 8px;
+      --state: var(--green);
+      --state-soft: var(--green-soft);
     }
 
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
     body {
       margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
       color: var(--text);
-      font-family: "Aptos", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(45, 212, 191, 0.12), transparent 30%),
-        linear-gradient(180deg, #050914 0%, #08101f 100%);
+      font-family: "Segoe UI", Arial, sans-serif;
     }
 
-    .shell {
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 22px 16px 32px;
-    }
+    body.is-emergency { --state: var(--red); --state-soft: var(--red-soft); }
+    body.is-offline { --state: #64748b; --state-soft: #eef2f6; }
 
+    .shell { max-width: 1240px; margin: 0 auto; padding: 22px; }
     .topbar {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       gap: 16px;
-      align-items: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
-
-    .title {
-      margin: 0;
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      letter-spacing: -0.04em;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
+    .title { margin: 0; font-size: 1.35rem; font-weight: 750; }
+    .top-meta { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 0.86rem; }
     .refresh {
-      appearance: none;
-      border: 1px solid rgba(96, 165, 250, 0.22);
-      background: linear-gradient(135deg, rgba(96, 165, 250, 0.18), rgba(45, 212, 191, 0.12));
-      color: var(--text);
-      border-radius: 999px;
-      padding: 11px 16px;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--blue);
       cursor: pointer;
-      font: inherit;
-      box-shadow: var(--shadow);
+      font-size: 1.2rem;
     }
+    .refresh:disabled { opacity: 0.55; cursor: wait; }
 
-    .hero {
-      border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(15, 22, 36, 0.92), rgba(10, 14, 24, 0.96));
-      border-radius: 28px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 16px;
-    }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .grid {
+    .dashboard-grid {
       display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
       gap: 14px;
-      margin-bottom: 16px;
     }
-
-    .stat {
-      grid-column: span 3;
+    .surface {
+      background: var(--surface);
       border: 1px solid var(--line);
-      background: var(--panel);
       border-radius: var(--radius);
-      padding: 18px;
-      min-height: 118px;
       box-shadow: var(--shadow);
-      position: relative;
+    }
+
+    .status-banner {
+      grid-column: 1 / -1;
+      min-height: 210px;
+      padding: 26px 30px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      border-color: color-mix(in srgb, var(--state) 24%, var(--line));
+      background: linear-gradient(105deg, var(--state-soft), #ffffff 68%);
       overflow: hidden;
+      transition: background 350ms ease, border-color 350ms ease;
     }
-
-    .stat::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(96, 165, 250, 0.08), transparent 55%);
-      pointer-events: none;
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 0.88rem;
-      margin-bottom: 14px;
-    }
-
-    .stat-value {
-      font-size: clamp(1.65rem, 3vw, 2.2rem);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-
-    .stat-note {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .panel {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      border-radius: 28px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .panel-title {
-      margin: 0;
-      font-size: 1rem;
-    }
-
-    .panel-subtitle {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .feed {
+    .status-symbol {
+      flex: 0 0 132px;
+      width: 132px;
+      height: 150px;
       display: grid;
-      gap: 10px;
+      place-items: center;
+      color: white;
+      background: var(--state);
+      font-size: 4rem;
+      font-weight: 800;
+      clip-path: polygon(50% 0, 92% 16%, 86% 72%, 50% 100%, 14% 72%, 8% 16%);
+      filter: drop-shadow(0 8px 12px color-mix(in srgb, var(--state) 25%, transparent));
+      animation: status-float 3s ease-in-out infinite;
     }
-
-    .event {
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 20px;
-      padding: 14px 15px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
+    .status-copy { flex: 1; min-width: 0; }
+    .status-copy h2 { margin: 0; color: var(--state); font-size: clamp(1.7rem, 3vw, 2.6rem); transition: color 300ms ease; }
+    .status-copy p { margin: 12px 0 0; color: var(--muted); font-size: 1rem; }
+    .state-dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: var(--state);
+      animation: status-pulse 1.8s ease-out infinite;
     }
-
-    .event-top {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 7px 10px;
+    .device-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .device-chip {
+      padding: 8px 11px;
+      border: 1px solid color-mix(in srgb, var(--state) 18%, var(--line));
       border-radius: 999px;
-      font-size: 0.82rem;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text);
-    }
-
-    .pill.good { background: rgba(45, 212, 191, 0.14); color: #8af0e1; }
-    .pill.warn { background: rgba(251, 191, 36, 0.14); color: #fde68a; }
-    .pill.bad { background: rgba(251, 113, 133, 0.14); color: #fda4af; }
-    .pill.blue { background: rgba(96, 165, 250, 0.14); color: #bfdbfe; }
-
-    .event h3 {
-      margin: 0;
-      font-size: 0.98rem;
-      font-weight: 600;
-    }
-
-    .event p {
-      margin: 6px 0 0;
+      background: rgba(255, 255, 255, 0.72);
       color: var(--muted);
-      line-height: 1.5;
-      max-width: 72ch;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      font-size: 0.78rem;
     }
+    .device-chip strong { color: var(--text); margin-left: 4px; }
+    .section-label { margin: 0 0 16px; font-size: 0.9rem; font-weight: 750; }
 
-    .event-meta {
+    .stats {
+      grid-column: 1 / -1;
       display: grid;
-      align-content: start;
-      gap: 8px;
-      text-align: right;
-      color: var(--muted);
-      font-size: 0.9rem;
-      min-width: 160px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .stat { padding: 17px 20px; min-height: 108px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat-label { color: var(--muted); font-size: 0.8rem; }
+    .stat-row { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--text); }
+    .stat-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--state-soft);
+      color: var(--state);
+      font-weight: 800;
     }
 
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 18px;
-      border-radius: 18px;
-      border: 1px dashed rgba(148, 163, 184, 0.18);
+    .audio-panel { grid-column: 2; grid-row: 3; padding: 20px; }
+    .audio-status { display: flex; gap: 13px; align-items: center; }
+    .mic {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--state);
+      background: var(--state-soft);
+      font-size: 1.5rem;
     }
-
-    .footer {
+    .audio-title { color: var(--state); font-weight: 750; }
+    .audio-line {
+      height: 34px;
+      margin: 18px 0;
+      opacity: 0.6;
+      background: repeating-linear-gradient(90deg, transparent 0 5px, var(--state) 5px 7px, transparent 7px 12px);
+      mask-image: linear-gradient(transparent 30%, #000 30% 70%, transparent 70%);
+      background-position: 0 0;
+      animation: audio-flow 1.2s linear infinite;
+    }
+    .transcript-box { padding: 15px 0; border-top: 1px solid var(--line); }
+    .transcript-label { color: var(--muted); font-size: 0.78rem; margin-bottom: 8px; }
+    .transcript { margin: 0; min-height: 44px; line-height: 1.5; font-weight: 600; }
+    .confidence { margin-top: 10px; color: var(--state); font-size: 0.82rem; font-weight: 750; }
+    .response-box {
       margin-top: 14px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.88rem;
+      padding: 14px;
+      border-radius: 6px;
+      color: var(--state);
+      background: var(--state-soft);
+      font-size: 0.84rem;
+      font-weight: 700;
     }
 
-    @media (max-width: 980px) {
-      .stat { grid-column: span 6; }
+    .activity { grid-column: 1; grid-row: 3; padding: 20px; min-width: 0; }
+    .activity-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .activity-head h2 { margin: 0; font-size: 0.95rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    th { padding: 10px; text-align: left; color: var(--muted); font-weight: 650; border-bottom: 1px solid var(--line); }
+    td { padding: 11px 10px; border-bottom: 1px solid #edf1f4; vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    .event-message { max-width: 320px; line-height: 1.4; }
+    .badge { display: inline-flex; padding: 5px 8px; border-radius: 999px; font-weight: 700; font-size: 0.72rem; }
+    .badge.normal { color: var(--green); background: var(--green-soft); }
+    .badge.emergency { color: var(--red); background: var(--red-soft); }
+    .empty { padding: 22px; text-align: center; color: var(--muted); }
+
+    body.is-emergency .status-banner { animation: emergency-glow 1.25s ease-in-out infinite alternate; }
+    body.is-emergency .status-symbol { animation: emergency-pop 0.85s ease-in-out infinite alternate; }
+
+    @keyframes status-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes status-pulse {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--state) 38%, transparent); }
+      70%, 100% { box-shadow: 0 0 0 9px transparent; }
+    }
+    @keyframes audio-flow { to { background-position: 24px 0; } }
+    @keyframes emergency-glow {
+      from { box-shadow: var(--shadow); }
+      to { box-shadow: 0 8px 30px rgba(225, 29, 46, 0.18); }
+    }
+    @keyframes emergency-pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.045); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
     }
 
-    @media (max-width: 720px) {
-      .shell { padding: 16px 12px 26px; }
-      .topbar, .panel-head, .event { grid-template-columns: 1fr; }
-      .topbar, .panel-head { flex-direction: column; align-items: flex-start; }
-      .stat { grid-column: span 12; }
-      .event-meta { text-align: left; min-width: 0; }
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .stats, .activity, .audio-panel { grid-column: 1; grid-row: auto; }
+    }
+    @media (max-width: 620px) {
+      .shell { padding: 14px; }
+      .top-meta span { display: none; }
+      .status-banner { min-height: 0; padding: 22px 18px; gap: 18px; }
+      .status-symbol { flex-basis: 82px; width: 82px; height: 94px; font-size: 2.6rem; }
+      .status-copy h2 { font-size: 1.45rem; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+      .stat:last-child { border-bottom: 0; }
     }
   </style>
 </head>
-<body>
+<body class="is-normal">
   <main class="shell">
+    <!-- Header menampilkan nama sistem, jam WIB, dan kontrol refresh manual. -->
     <header class="topbar">
-      <div>
-        <h1 class="title">Monitoring Dashboard</h1>
+      <h1 class="title">Pusat Monitoring Keselamatan</h1>
+      <div class="top-meta">
+        <span id="clock">-</span>
+        <button class="refresh" id="refresh-btn" type="button" title="Perbarui data" aria-label="Perbarui data">&#8635;</button>
       </div>
-      <button class="refresh" id="refresh-btn" type="button">Refresh</button>
     </header>
 
-    <section class="hero">
-      <div class="chips">
-        <div class="chip">Status: <strong id="overall-status">-</strong></div>
-        <div class="chip">Update: <strong id="last-refresh">-</strong></div>
-        <div class="chip">Auto: <strong>5s</strong></div>
-      </div>
-    </section>
-
-    <section class="grid" id="stats">
-      <div class="stat"><div class="stat-label">Device</div><div class="stat-value" data-key="total_devices">-</div><div class="stat-note">terdaftar</div></div>
-      <div class="stat"><div class="stat-label">Aktif</div><div class="stat-value" data-key="active_devices">-</div><div class="stat-note">siap pakai</div></div>
-      <div class="stat"><div class="stat-label">Emergency</div><div class="stat-value" data-key="emergency_events_24h">-</div><div class="stat-note">24 jam</div></div>
-      <div class="stat"><div class="stat-label">Telegram</div><div class="stat-value" data-key="sent_notifications_24h">-</div><div class="stat-note">terkirim</div></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2 class="panel-title">Live Feed</h2>
-          <p class="panel-subtitle">Event terbaru.</p>
+    <div class="dashboard-grid">
+      <!-- Event paling baru menentukan warna dan pesan status utama. -->
+      <section class="surface status-banner" aria-live="polite">
+        <div class="status-symbol" id="status-symbol">&#10003;</div>
+        <div class="status-copy">
+          <h2 id="status-title">Kondisi Normal</h2>
+          <p><span class="state-dot"></span><span id="status-description">Tidak terdeteksi suara bahaya</span></p>
+          <div class="device-summary">
+            <span class="device-chip">Perangkat <strong id="device-name">Menunggu data</strong></span>
+            <span class="device-chip">Lokasi <strong id="device-location">Ruang 1</strong></span>
+            <span class="device-chip">Status <strong id="connection-status">Menghubungkan</strong></span>
+          </div>
         </div>
-      </div>
-      <div class="feed" id="feed">
-        <div class="empty">Memuat...</div>
-      </div>
-    </section>
+      </section>
 
-    <div class="footer">Data ditarik langsung dari backend FastAPI.</div>
+      <!-- Statistik ringkas dihitung backend untuk periode 24 jam. -->
+      <section class="surface stats">
+        <div class="stat">
+          <div class="stat-label">Kejadian 24 Jam</div>
+          <div class="stat-row"><strong class="stat-value" data-key="total_events_24h">-</strong><span class="stat-mark">#</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Emergency 24 Jam</div>
+          <div class="stat-row"><strong class="stat-value" data-key="emergency_events_24h">-</strong><span class="stat-mark">!</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Perangkat Aktif</div>
+          <div class="stat-row"><strong class="stat-value" data-key="active_devices">-</strong><span class="stat-mark">&#10003;</span></div>
+        </div>
+      </section>
+
+      <!-- Panel audio menampilkan transkrip serta confidence terakhir. -->
+      <aside class="surface audio-panel">
+        <h2 class="section-label">Audio Terbaru</h2>
+        <div class="audio-status">
+          <div class="mic">&#9835;</div>
+          <div>
+            <div class="audio-title" id="audio-title">Menunggu suara</div>
+            <div class="transcript-label" id="event-time">Belum ada rekaman</div>
+          </div>
+        </div>
+        <div class="audio-line" aria-hidden="true"></div>
+        <div class="transcript-box">
+          <div class="transcript-label">Teks suara</div>
+          <p class="transcript" id="latest-transcript">Belum ada transkrip</p>
+          <div class="confidence" id="latest-confidence">Confidence: -</div>
+        </div>
+        <div class="response-box" id="response-message">Sistem siap memantau suara pekerja.</div>
+      </aside>
+
+      <!-- Tabel memudahkan operator membandingkan event terbaru. -->
+      <section class="surface activity">
+        <div class="activity-head">
+          <h2>Aktivitas Terbaru</h2>
+          <span class="transcript-label">Diperbarui setiap 1 detik</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Tipe</th><th>Perangkat</th><th>Pesan</th><th>Confidence</th></tr></thead>
+            <tbody id="event-table"><tr><td colspan="5" class="empty">Memuat data...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script>
+    // Endpoint monitoring bersifat read-only dan tidak memerlukan token perangkat.
     const overviewUrl = "/api/monitoring/overview";
-    const eventsUrl = "/api/monitoring/events?limit=8";
-    const feed = document.getElementById("feed");
-    const lastRefresh = document.getElementById("last-refresh");
-    const overallStatus = document.getElementById("overall-status");
+    const eventsUrl = "/api/monitoring/events?limit=6";
     const refreshButton = document.getElementById("refresh-btn");
     const statNodes = document.querySelectorAll("[data-key]");
+    const eventTable = document.getElementById("event-table");
+    let refreshInProgress = false;
+
+    function escapeHtml(value) {
+      const node = document.createElement("div");
+      node.textContent = value == null ? "" : String(value);
+      return node.innerHTML;
+    }
 
     function formatDate(value) {
       if (!value) return "-";
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return "-";
       return new Intl.DateTimeFormat("id-ID", {
-        dateStyle: "medium",
-        timeStyle: "short",
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Jakarta",
       }).format(date);
     }
 
-    function labelClass(label) {
-      if (label === "Emergency") return "bad";
-      if (label === "Normal") return "good";
-      return "warn";
-    }
-
-    function notificationClass(status) {
-      if (status === "sent") return "good";
-      if (status === "failed") return "bad";
-      if (status === "skipped") return "warn";
-      return "blue";
+    function setVisualState(label) {
+      // Hanya event terbaru yang mengendalikan keadaan visual dashboard.
+      const emergency = label === "Emergency";
+      document.body.className = emergency ? "is-emergency" : "is-normal";
+      document.getElementById("status-symbol").innerHTML = emergency ? "!" : "&#10003;";
+      document.getElementById("status-title").textContent = emergency ? "BAHAYA TERDETEKSI" : "Kondisi Normal";
+      document.getElementById("status-description").textContent = emergency
+        ? "Segera lakukan pemeriksaan lokasi"
+        : "Tidak terdeteksi suara bahaya";
+      document.getElementById("audio-title").textContent = emergency
+        ? "Suara bahaya terdeteksi"
+        : "Tidak terdeteksi suara bahaya";
+      document.getElementById("response-message").textContent = emergency
+        ? "Tindakan darurat diperlukan. Periksa lokasi pekerja."
+        : "Sistem aktif dan siap memantau suara pekerja.";
     }
 
     function renderOverview(data) {
       statNodes.forEach((node) => {
-        const key = node.getAttribute("data-key");
-        node.textContent = data[key] ?? "-";
+        node.textContent = data[node.dataset.key] ?? "-";
       });
-      overallStatus.textContent = data.emergency_events_24h > 0 ? "Waspada" : "Normal";
+    }
+
+    function renderLatest(item) {
+      if (!item) {
+        setVisualState("Normal");
+        return;
+      }
+      setVisualState(item.label);
+      document.getElementById("device-name").textContent = item.device_name || "Perangkat";
+      document.getElementById("device-location").textContent = "Ruang 1";
+      document.getElementById("connection-status").textContent = "Terhubung";
+      document.getElementById("latest-transcript").textContent = item.transcript_text || "Tidak ada suara terdeteksi";
+      document.getElementById("latest-confidence").textContent = `Confidence: ${(item.confidence * 100).toFixed(1)}%`;
+      document.getElementById("event-time").textContent = formatDate(item.created_at);
     }
 
     function renderEvents(items) {
       if (!items.length) {
-        feed.innerHTML = '<div class="empty">Belum ada event.</div>';
+        eventTable.innerHTML = '<tr><td colspan="5" class="empty">Belum ada aktivitas.</td></tr>';
+        renderLatest(null);
         return;
       }
-
-      feed.innerHTML = items.map((item) => {
-        const confidence = (item.confidence * 100).toFixed(1);
-        return `
-          <article class="event">
-            <div>
-              <div class="event-top">
-                <span class="pill blue">${item.device_name}</span>
-                <span class="pill">${item.device_id}</span>
-                ${item.device_location ? `<span class="pill">${item.device_location}</span>` : ""}
-                <span class="pill ${labelClass(item.label)}">${item.label}</span>
-                <span class="pill ${notificationClass(item.notification_status)}">${item.notification_status || "none"}</span>
-              </div>
-              <h3>${item.audio_file_name}</h3>
-              <p>${item.transcript_text}</p>
-            </div>
-            <div class="event-meta">
-              <div><strong>${confidence}%</strong></div>
-              <div>${formatDate(item.created_at)}</div>
-            </div>
-          </article>
-        `;
+      renderLatest(items[0]);
+      eventTable.innerHTML = items.map((item) => {
+        const kind = item.label === "Emergency" ? "emergency" : "normal";
+        return `<tr>
+          <td>${escapeHtml(formatDate(item.created_at))}</td>
+          <td><span class="badge ${kind}">${escapeHtml(item.label)}</span></td>
+          <td>${escapeHtml(item.device_name)}</td>
+          <td class="event-message">${escapeHtml(item.transcript_text)}</td>
+          <td><strong>${(item.confidence * 100).toFixed(1)}%</strong></td>
+        </tr>`;
       }).join("");
     }
 
     async function refreshDashboard() {
+      // Guard mencegah request polling baru sebelum request sebelumnya selesai.
+      if (refreshInProgress) return;
+      refreshInProgress = true;
       refreshButton.disabled = true;
-      refreshButton.textContent = "Loading...";
       try {
         const [overviewResponse, eventsResponse] = await Promise.all([
-          fetch(overviewUrl),
-          fetch(eventsUrl),
+          fetch(overviewUrl, { cache: "no-store" }),
+          fetch(eventsUrl, { cache: "no-store" }),
         ]);
-
-        if (!overviewResponse.ok || !eventsResponse.ok) {
-          throw new Error("data gagal dimuat");
-        }
-
+        if (!overviewResponse.ok || !eventsResponse.ok) throw new Error("Data gagal dimuat");
         renderOverview(await overviewResponse.json());
         renderEvents(await eventsResponse.json());
-        lastRefresh.textContent = formatDate(new Date().toISOString());
       } catch (error) {
-        overallStatus.textContent = "Offline";
-        feed.innerHTML = `<div class="empty">${error.message}</div>`;
+        document.body.className = "is-offline";
+        document.getElementById("status-symbol").textContent = "?";
+        document.getElementById("status-title").textContent = "Sistem Offline";
+        document.getElementById("status-description").textContent = error.message;
+        document.getElementById("connection-status").textContent = "Backend tidak dapat dihubungi";
       } finally {
+        refreshInProgress = false;
         refreshButton.disabled = false;
-        refreshButton.textContent = "Refresh";
       }
     }
 
+    function updateClock() {
+      // Zona waktu ditentukan eksplisit agar jam konsisten sebagai WIB.
+      document.getElementById("clock").textContent = new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Jakarta",
+      }).format(new Date()) + " WIB";
+    }
+
     refreshButton.addEventListener("click", refreshDashboard);
+    updateClock();
     refreshDashboard();
-    setInterval(refreshDashboard, 5000);
+    setInterval(updateClock, 1000);
+    setInterval(refreshDashboard, 1000);
   </script>
 </body>
 </html>

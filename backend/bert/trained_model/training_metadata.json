@@ -1,0 +1,13 @@
+{
+  "dataset_path":"dataset/dataset_final.csv",
+  "base_model":"bert-base-uncased",
+  "train_sample_size":1000,
+  "freeze_bert_encoder":true,
+  "max_length":64,
+  "batch_size":16,
+  "epochs":3,
+  "best_epoch":3,
+  "best_valid_f1":0.6956521739,
+  "test_accuracy":0.54,
+  "test_f1":0.6714285714
+}

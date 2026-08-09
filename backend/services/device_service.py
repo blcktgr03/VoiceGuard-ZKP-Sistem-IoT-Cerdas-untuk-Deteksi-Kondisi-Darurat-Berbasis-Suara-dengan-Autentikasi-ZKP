@@ -4,7 +4,7 @@ from backend.repositories.device_repository import DeviceRepository
 
 
 class DeviceService:
-    """Use-case service for registered ESP8266 devices."""
+    """Use-case service for registered IoT devices."""
 
     def __init__(self, repository: DeviceRepository) -> None:
         """Create the service with a device repository."""

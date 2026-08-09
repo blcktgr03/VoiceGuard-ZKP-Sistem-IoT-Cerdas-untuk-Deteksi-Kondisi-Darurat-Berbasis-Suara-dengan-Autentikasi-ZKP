@@ -1,5 +1,11 @@
 from datetime import datetime
-from enum import StrEnum
+try:
+    from enum import StrEnum
+except ImportError:  # Python 3.10 compatibility for the training environment.
+    from enum import Enum
+
+    class StrEnum(str, Enum):
+        pass
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -141,11 +147,23 @@ class ProcessingResponse(BaseModel):
     """Full response body for the end-to-end audio processing endpoint."""
 
     authenticated: bool
+    emergency_detected: bool
     audio: AudioRecordRead
     transcript: TranscriptRead
     classification: ClassificationRead
     notification: NotificationRead | None = None
     server_proof: ServerProofRead
+
+
+class PresentEncryptedAudioRequest(BaseModel):
+    """JSON body for PRESENT-128 encrypted audio uploads."""
+
+    device_id: str = Field(min_length=3, max_length=80)
+    nonce_hex: str = Field(min_length=16, max_length=16)
+    ciphertext_b64: str = Field(min_length=1)
+    tag_hex: str = Field(min_length=64, max_length=64)
+    filename: str = Field(default="chunk.wav", min_length=1, max_length=120)
+    mime_type: str = Field(default="audio/wav", min_length=1, max_length=120)
 
 
 class MonitoringOverviewRead(BaseModel):

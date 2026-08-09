@@ -1,9 +1,13 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 .pytest_cache/
+.tmp_pytest/
 .mypy_cache/
 .ruff_cache/
+.coverage
+htmlcov/
 .venv/
 venv/
 env/
@@ -11,11 +15,25 @@ env/
 # Environment and secrets
 .env
 .env.*
+!/.env.example
+
+# Local device configuration (copy from config.example.h)
+frontend/firmware/esp32_inmp441/**/config.h
+frontend/firmware/esp8266/esp8266_emergency_detector/config.h
 
 # Logs and runtime data
 backend/logs/
 backend/uploads/
 *.log
+
+# Local ML weights (too large for regular GitHub files)
+backend/bert/trained_model*/model.safetensors
+backend/models/faster-whisper-*/model.bin
+backend/models/faster-whisper-*/.cache/
+
+# Generated and temporary artifacts
+tmp/
+output/
 
 # SQLite / local database
 *.db
@@ -27,9 +45,10 @@ backend/uploads/
 .idea/
 
 # PlatformIO
-firmware/esp8266/.pio/
-firmware/esp8266/.piolibdeps/
+frontend/firmware/esp8266/.pio/
+frontend/firmware/esp8266/.piolibdeps/
 
 # OS files
+.DS_Store
 Thumbs.db
 Desktop.ini

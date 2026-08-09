@@ -81,6 +81,14 @@ class TextClassificationService:
 
         return self._tokenizer, self._model, torch
 
+    def warm_up(self) -> None:
+        """Load IndoBERT and run one inference during backend startup."""
+        try:
+            self.classify("sistem keselamatan siap digunakan")
+            logger.info("BERT warm-up completed.")
+        except Exception:
+            logger.exception("BERT warm-up failed; lazy loading remains available.")
+
     def _torch_device(self, torch):
         """Resolve the configured PyTorch device."""
         if self._settings.bert_device == "cuda" and torch.cuda.is_available():

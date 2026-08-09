@@ -1,0 +1,13 @@
+{
+  "dataset_path":"dataset/dataset_final.csv",
+  "base_model":"indobenchmark\/indobert-base-p1",
+  "train_sample_size":null,
+  "freeze_bert_encoder":false,
+  "max_length":64,
+  "batch_size":8,
+  "epochs":1,
+  "best_epoch":1,
+  "best_valid_f1":0.8871745419,
+  "test_accuracy":0.9061470911,
+  "test_f1":0.9013651221
+}
