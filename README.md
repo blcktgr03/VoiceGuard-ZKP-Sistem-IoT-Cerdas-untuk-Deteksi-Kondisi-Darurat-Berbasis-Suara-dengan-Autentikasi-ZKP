@@ -10,7 +10,6 @@ machine_learning/
 |-- dataset/                 Data final, notebook, dan runner fine-tuning
 |-- backend/                 FastAPI, ZKP, Whisper, IndoBERT, database, dan tests
 |-- frontend/                Firmware perangkat, materi UI, dan dokumentasi visual
-|-- Paparan/                 Laporan dan materi capstone
 |-- .env                     Konfigurasi lokal dan rahasia, tidak masuk Git
 |-- .env.example             Contoh konfigurasi
 |-- requirements.txt         Pintu instalasi dependensi backend
