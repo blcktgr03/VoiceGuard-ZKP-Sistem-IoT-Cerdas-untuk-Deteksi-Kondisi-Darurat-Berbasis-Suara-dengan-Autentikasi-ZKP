@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # VoiceGuard ZKP
 
 Proyek ini mendeteksi ucapan darurat pekerja menggunakan perangkat ESP32-S3 dan mikrofon INMP441. Audio dikirim ke FastAPI setelah perangkat lolos autentikasi Schnorr Zero-Knowledge Proof (ZKP), diubah menjadi teks bahasa Indonesia oleh faster-whisper, dikoreksi, lalu diklasifikasikan sebagai `Normal` atau `Emergency` oleh IndoBERT. Hasil akhirnya ditampilkan pada dashboard monitoring dan dikirim kembali ke perangkat untuk mengendalikan buzzer.
